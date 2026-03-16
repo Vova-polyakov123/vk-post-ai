@@ -20,6 +20,12 @@ app.post("/generate", async (req, res) => {
 
     try {
 
+        if (!API_KEY) {
+            return res.json({
+                result: "Ошибка: API ключ не найден"
+            });
+        }
+
         const { topic, type, category } = req.body;
 
         let prompt = "";
@@ -49,16 +55,33 @@ app.post("/generate", async (req, res) => {
             body: JSON.stringify({
                 model: "mistralai/mistral-7b-instruct",
                 messages: [
-                    { role: "user", content: prompt }
-                ]
+                    {
+                        role: "system",
+                        content: "Ты профессиональный SMM специалист и пишешь посты для ВКонтакте."
+                    },
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.7,
+                max_tokens: 400
             })
         });
 
         const data = await response.json();
 
-        const result =
-            data?.choices?.[0]?.message?.content ||
-            "AI не смог сгенерировать текст";
+        console.log("AI ответ:", data);
+
+        let result = "AI не смог сгенерировать текст";
+
+        if (data?.choices && data.choices.length > 0) {
+            result = data.choices[0].message.content;
+        }
+
+        if (data?.error) {
+            result = "Ошибка AI: " + data.error.message;
+        }
 
         res.json({ result });
 
