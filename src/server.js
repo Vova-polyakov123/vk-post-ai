@@ -25,7 +25,7 @@ app.post("/generate", async (req, res) => {
         let prompt = "";
 
         if (type === "post") {
-            prompt = `Напиши короткий пост для ВКонтакте. Категория: ${category}. Тема: ${topic}`;
+            prompt = `Напиши интересный пост для ВКонтакте. Категория: ${category}. Тема: ${topic}`;
         }
 
         if (type === "ideas") {
@@ -33,7 +33,7 @@ app.post("/generate", async (req, res) => {
         }
 
         if (type === "hashtags") {
-            prompt = `Сделай популярные хештеги для темы ${topic}`;
+            prompt = `Напиши популярные хештеги для темы ${topic}`;
         }
 
         if (type === "ads") {
@@ -41,7 +41,7 @@ app.post("/generate", async (req, res) => {
         }
 
         const response = await fetch(
-            "https://router.huggingface.co/hf-inference/models/google/flan-t5-small",
+            "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
             {
                 method: "POST",
                 headers: {
