@@ -30,7 +30,7 @@ export const App = () => {
 
     try {
 
-      const response = await fetch("http://localhost:3001/generate", {
+      const response = await fetch("https://vk-post-ai.onrender.com", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -117,7 +117,8 @@ export const App = () => {
           background: "#0077ff",
           color: "white",
           border: "none",
-          marginBottom: 20
+          marginBottom: 20,
+          cursor: "pointer"
         }}
       >
 
@@ -129,7 +130,8 @@ export const App = () => {
         style={{
           background: "#f3f3f3",
           padding: 15,
-          borderRadius: 10
+          borderRadius: 10,
+          minHeight: 80
         }}
       >
 
