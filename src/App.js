@@ -28,9 +28,14 @@ export const App = () => {
 
   const generateContent = async () => {
 
+    if (!topic) {
+      setResult("Введите тему");
+      return;
+    }
+
     try {
 
-      const response = await fetch("https://vk-post-ai.onrender.com", {
+      const response = await fetch("https://vk-post-ai.onrender.com/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -42,14 +47,18 @@ export const App = () => {
         })
       });
 
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+
       const data = await response.json();
 
-      setResult(data.result);
+      setResult(data.result || "AI ничего не сгенерировал");
 
     } catch (error) {
 
       console.log("Ошибка:", error);
-      setResult("Ошибка генерации");
+      setResult("Ошибка генерации. Сервер может просыпаться 30-60 секунд");
 
     }
 
