@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = process.env.OPENAI_API_KEY;
+const API_KEY = process.env.OPENROUTER_API_KEY;
 
 app.get("/", (req, res) => {
     res.send("AI сервер работает");
@@ -40,33 +40,25 @@ app.post("/generate", async (req, res) => {
             prompt = `Напиши рекламный текст для темы ${topic}`;
         }
 
-        const response = await fetch(
-            "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
-            {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    inputs: prompt
-                })
-            }
-        );
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "mistralai/mistral-7b-instruct",
+                messages: [
+                    { role: "user", content: prompt }
+                ]
+            })
+        });
 
         const data = await response.json();
 
-        console.log("AI ответ:", data);
-
-        let result = "AI не смог сгенерировать текст";
-
-        if (Array.isArray(data)) {
-            result = data[0]?.generated_text || result;
-        }
-
-        if (data.error) {
-            result = data.error;
-        }
+        const result =
+            data?.choices?.[0]?.message?.content ||
+            "AI не смог сгенерировать текст";
 
         res.json({ result });
 
