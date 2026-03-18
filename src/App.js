@@ -9,6 +9,7 @@ export const App = () => {
   const [category, setCategory] = useState("business");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [styleType, setStyleType] = useState("neon");
 
   useEffect(() => {
     bridge.send("VKWebAppInit");
@@ -68,7 +69,7 @@ export const App = () => {
 
   };
 
-  // 🔥 СТОРИС
+  // 🔥 УЛЬТРА PRO СТОРИС
   const shareToStory = async () => {
 
     if (!result) {
@@ -77,11 +78,77 @@ export const App = () => {
     }
 
     try {
-      await bridge.send("VKWebAppShowStoryBox", {
-        background_type: "image",
-        url: "https://via.placeholder.com/1080x1920.png?text=AI+POST",
-        text: result.slice(0, 200)
-      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1920;
+
+      const ctx = canvas.getContext("2d");
+
+      // 🎨 фон
+      if (styleType === "neon") {
+        const g = ctx.createLinearGradient(0, 0, 1080, 1920);
+        g.addColorStop(0, "#ff00cc");
+        g.addColorStop(1, "#3333ff");
+        ctx.fillStyle = g;
+      } else if (styleType === "business") {
+        ctx.fillStyle = "#0f2027";
+      } else {
+        ctx.fillStyle = "#000000";
+      }
+
+      ctx.fillRect(0, 0, 1080, 1920);
+
+      // затемнение
+      ctx.fillStyle = "rgba(0,0,0,0.5)";
+      ctx.fillRect(50, 250, 980, 1000);
+
+      // текст
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 64px Arial";
+
+      const text = result.slice(0, 220);
+      const words = text.split(" ");
+
+      let line = "";
+      let y = 350;
+
+      for (let i = 0; i < words.length; i++) {
+        const testLine = line + words[i] + " ";
+        const width = ctx.measureText(testLine).width;
+
+        if (width > 900) {
+          ctx.fillText(line, 90, y);
+          line = words[i] + " ";
+          y += 90;
+        } else {
+          line = testLine;
+        }
+      }
+
+      ctx.fillText(line, 90, y);
+
+      // бренд
+      ctx.font = "40px Arial";
+      ctx.fillStyle = "#00ffcc";
+      ctx.fillText("⚡ AI POST GENERATOR", 90, 1700);
+
+      // blob
+      const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, "image/png")
+      );
+
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        await bridge.send("VKWebAppShowStoryBox", {
+          background_type: "image",
+          blob: reader.result
+        });
+      };
+
+      reader.readAsDataURL(blob);
+
     } catch (e) {
       console.log("Ошибка сторис:", e);
     }
@@ -126,6 +193,17 @@ export const App = () => {
         <option value="ads">Реклама</option>
       </select>
 
+      {/* 🎨 выбор дизайна */}
+      <select
+        value={styleType}
+        onChange={(e) => setStyleType(e.target.value)}
+        style={{ padding: 10, width: "100%", marginBottom: 10 }}
+      >
+        <option value="neon">🔥 Неон</option>
+        <option value="business">💼 Бизнес</option>
+        <option value="dark">🌑 Тёмный</option>
+      </select>
+
       <button
         onClick={generateContent}
         disabled={loading}
@@ -160,8 +238,7 @@ export const App = () => {
         style={{
           marginTop: 10,
           padding: 10,
-          width: "100%",
-          cursor: "pointer"
+          width: "100%"
         }}
       >
         📋 Скопировать
@@ -175,11 +252,10 @@ export const App = () => {
           width: "100%",
           background: "#4caf50",
           color: "white",
-          border: "none",
-          cursor: "pointer"
+          border: "none"
         }}
       >
-        📲 Поделиться в сторис
+        📲 Поделиться в сторис PRO
       </button>
 
     </div>
