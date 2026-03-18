@@ -14,7 +14,7 @@ const API_KEY = process.env.HF_API_KEY;
 
 // 🔥 ПРОВЕРКА
 app.get("/", (req, res) => {
-    res.send("🔥 HF NEW API WORKING");
+    res.send("🔥 HF ULTRA WORKING");
 });
 
 // 🚀 ГЕНЕРАЦИЯ
@@ -34,61 +34,118 @@ app.post("/generate", async (req, res) => {
 
         let prompt = "";
 
+        // 💡 улучшенные промпты
         if (type === "post") {
-            prompt = `Напиши вирусный пост ВКонтакте. Тема: ${topic}`;
-        } else if (type === "ads") {
-            prompt = `Напиши рекламный пост. Тема: ${topic}`;
-        } else if (type === "ideas") {
-            prompt = `Дай 10 идей постов: ${topic}`;
-        } else if (type === "hashtags") {
-            prompt = `Напиши 15 хештегов: ${topic}`;
-        } else {
-            prompt = `Напиши текст: ${topic}`;
+            prompt = `
+Напиши вирусный пост для ВКонтакте.
+
+Категория: ${category}
+Тема: ${topic}
+
+Формат:
+🔥 Заголовок
+Текст (5-7 строк, эмоции, эмодзи)
+📲 Призыв
+
+Пиши на русском языке.
+`;
         }
 
-        // 🔥 НОВЫЙ HF API
-        const response = await fetch(
-            "https://router.huggingface.co/v1/chat/completions",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "google/gemma-2b-it",
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ],
-                    max_tokens: 500
-                })
+        else if (type === "ads") {
+            prompt = `
+Напиши мощный рекламный пост.
+
+Тема: ${topic}
+
+Формат:
+💥 Заголовок
+😱 Проблема
+🔥 Решение
+💰 Выгоды
+📲 Призыв
+
+На русском языке.
+`;
+        }
+
+        else if (type === "ideas") {
+            prompt = `Дай 10 идей постов на тему: ${topic}`;
+        }
+
+        else if (type === "hashtags") {
+            prompt = `Напиши 15 хештегов для темы: ${topic}`;
+        }
+
+        else {
+            prompt = `Напиши текст на тему: ${topic}`;
+        }
+
+        // 🔥 СПИСОК МОДЕЛЕЙ (fallback)
+        const models = [
+            "mistralai/mistral-7b-instruct",
+            "google/gemma-2b-it"
+        ];
+
+        let result = null;
+        let lastError = null;
+
+        for (const model of models) {
+
+            try {
+
+                const response = await fetch(
+                    "https://router.huggingface.co/v1/chat/completions",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${API_KEY}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            model,
+                            messages: [
+                                {
+                                    role: "system",
+                                    content: "Отвечай только на русском языке."
+                                },
+                                {
+                                    role: "user",
+                                    content: prompt
+                                }
+                            ],
+                            temperature: 0.9,
+                            max_tokens: 700
+                        })
+                    }
+                );
+
+                const data = await response.json();
+
+                console.log("MODEL:", model);
+                console.log("RESPONSE:", JSON.stringify(data, null, 2));
+
+                if (data?.choices?.length > 0) {
+                    result = data.choices[0].message.content.trim();
+                    break;
+                }
+
+                if (data?.error) {
+                    lastError = data.error.message;
+                }
+
+            } catch (err) {
+                lastError = err.message;
             }
-        );
+        }
 
-        const data = await response.json();
-
-        console.log("HF NEW RESPONSE:", JSON.stringify(data, null, 2));
-
-        // ❌ ошибка
-        if (data?.error) {
+        // ❌ если ничего не сработало
+        if (!result) {
             return res.json({
-                result: "❌ HF ошибка: " + data.error.message
+                result: `❌ AI не ответил\nПричина: ${lastError || "нет ответа"}`
             });
         }
 
-        // ✅ ответ
-        if (data?.choices?.length > 0) {
-            return res.json({
-                result: data.choices[0].message.content
-            });
-        }
-
-        return res.json({
-            result: "❌ AI не ответил"
-        });
+        res.json({ result });
 
     } catch (error) {
 
@@ -106,5 +163,5 @@ app.post("/generate", async (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-    console.log(`🚀 HF NEW server started on ${PORT}`);
+    console.log(`🚀 HF ULTRA server started on ${PORT}`);
 });
