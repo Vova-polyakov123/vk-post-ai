@@ -10,20 +10,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = process.env.OPENROUTER_API_KEY;
+const API_KEY = process.env.HF_API_KEY;
 
-// 🔍 Проверка
+// проверка
 app.get("/", (req, res) => {
-    res.send("🚀 AI сервер работает (FINAL)");
+    res.send("🚀 AI сервер (HuggingFace) работает");
 });
 
-// 🚀 Генерация
+// генерация
 app.post("/generate", async (req, res) => {
 
     try {
 
         if (!API_KEY) {
-            return res.json({ result: "❌ Нет API ключа" });
+            return res.json({ result: "❌ Нет HF ключа" });
         }
 
         const { topic, type, category } = req.body;
@@ -34,107 +34,55 @@ app.post("/generate", async (req, res) => {
 
         let prompt = "";
 
-        // 🔥 ЛОГИКА
         if (type === "post") {
-            prompt = `
-Напиши вирусный пост для ВКонтакте.
-
-Категория: ${category}
-Тема: ${topic}
-
-Формат:
-🔥 Заголовок
-Текст (5-7 строк)
-📲 Призыв
-
-Пиши ярко, с эмоциями и эмодзи.
-Только на русском языке.
-`;
+            prompt = `Напиши вирусный пост ВКонтакте. Категория: ${category}. Тема: ${topic}`;
         }
 
         else if (type === "ads") {
-            prompt = `
-Напиши продающий рекламный пост для ВКонтакте.
-
-Тема: ${topic}
-
-Формат:
-💥 Заголовок
-😱 Проблема
-🔥 Решение
-💰 Выгоды
-📲 Призыв к действию
-
-Только на русском языке.
-`;
+            prompt = `Напиши продающий рекламный текст ВКонтакте. Тема: ${topic}`;
         }
 
         else if (type === "ideas") {
-            prompt = `
-Дай 10 идей постов для ВКонтакте на тему: ${topic}
-
-Кратко, списком.
-`;
+            prompt = `Дай 10 идей постов: ${topic}`;
         }
 
         else if (type === "hashtags") {
-            prompt = `
-Напиши 15 популярных хештегов для темы: ${topic}
-
-Только список.
-`;
+            prompt = `Напиши 15 хештегов: ${topic}`;
         }
 
-        else {
-            prompt = `Напиши текст на тему: ${topic}`;
-        }
-
-        // ✅ ОДНА СТАБИЛЬНАЯ МОДЕЛЬ
-        const model = "meta-llama/llama-3-8b-instruct";
-
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: model,
-                messages: [
-                    {
-                        role: "system",
-                        content: "Ты профессиональный SMM специалист. Пиши только на русском языке."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.9,
-                max_tokens: 1000
-            })
-        });
+        // 🔥 бесплатная модель HF
+        const response = await fetch(
+            "https://api-inference.huggingface.co/models/google/flan-t5-large",
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${API_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    inputs: prompt
+                })
+            }
+        );
 
         const data = await response.json();
 
-        console.log("AI RESPONSE:", JSON.stringify(data, null, 2));
+        console.log("HF RESPONSE:", data);
 
-        // ❌ ошибка от AI
-        if (data?.error) {
+        if (data.error) {
             return res.json({
-                result: "❌ Ошибка AI: " + data.error.message
+                result: "❌ Ошибка HF: " + data.error
             });
         }
 
-        // ✅ успех
-        if (data?.choices?.length > 0) {
-            const result = data.choices[0].message.content.trim();
-            return res.json({ result });
+        if (Array.isArray(data) && data[0]?.generated_text) {
+            return res.json({
+                result: data[0].generated_text
+            });
         }
 
-        // ❌ если пусто
         return res.json({
-            result: "❌ AI не вернул текст"
+            result: "❌ AI не смог сгенерировать"
         });
 
     } catch (error) {
@@ -149,7 +97,6 @@ app.post("/generate", async (req, res) => {
 
 });
 
-// 🚀 запуск
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
