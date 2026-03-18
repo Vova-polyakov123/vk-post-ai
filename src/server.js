@@ -10,81 +10,80 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = process.env.HF_API_KEY;
+const API_KEY = process.env.OPENROUTER_API_KEY;
 
-// ✅ ПРОВЕРКА
+// 💥 ХРАНИМ ЛИМИТЫ (по user_id)
+const userLimits = {};
+
+const FREE_LIMIT = 3;
+
+// 🔥 проверка
 app.get("/", (req, res) => {
-    res.send("🔥 HF STABLE WORKING");
+    res.send("🔥 AI WITH LIMIT WORKING");
 });
 
-// 🚀 ГЕНЕРАЦИЯ
+// 🚀 генерация
 app.post("/generate", async (req, res) => {
 
     try {
 
-        if (!API_KEY) {
-            return res.json({ result: "❌ Нет HF ключа" });
-        }
-
-        const { topic, type, category } = req.body;
+        const { topic, userId } = req.body;
 
         if (!topic) {
             return res.json({ result: "❌ Введи тему" });
         }
 
-        let prompt = "";
-
-        if (type === "post") {
-            prompt = `Напиши пост для ВКонтакте. Тема: ${topic}`;
-        } else if (type === "ads") {
-            prompt = `Напиши рекламный пост. Тема: ${topic}`;
-        } else if (type === "ideas") {
-            prompt = `Дай 10 идей постов: ${topic}`;
-        } else if (type === "hashtags") {
-            prompt = `Напиши 15 хештегов: ${topic}`;
-        } else {
-            prompt = `Напиши текст: ${topic}`;
+        if (!userId) {
+            return res.json({ result: "❌ Нет userId" });
         }
 
-        const response = await fetch(
-            "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
-            {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${API_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    inputs: prompt
-                })
-            }
-        );
+        // 💥 считаем запросы
+        if (!userLimits[userId]) {
+            userLimits[userId] = 0;
+        }
+
+        userLimits[userId]++;
+
+        // ❌ если лимит превышен
+        if (userLimits[userId] > FREE_LIMIT) {
+            return res.json({
+                result: "💰 Бесплатные запросы закончились. Купи PRO доступ."
+            });
+        }
+
+        const prompt = `Напиши пост для ВКонтакте на тему: ${topic}`;
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "meta-llama/llama-3-8b-instruct",
+                messages: [
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ]
+            })
+        });
 
         const data = await response.json();
 
-        console.log("HF STABLE:", data);
-
-        // ❌ ошибка
-        if (data?.error) {
+        if (data?.choices?.length > 0) {
             return res.json({
-                result: "❌ HF ошибка: " + data.error
+                result: data.choices[0].message.content,
+                remaining: FREE_LIMIT - userLimits[userId]
             });
         }
 
-        // ✅ ответ
-        if (Array.isArray(data) && data[0]?.generated_text) {
-            return res.json({
-                result: data[0].generated_text
-            });
-        }
-
-        return res.json({
-            result: "❌ AI не ответил"
-        });
+        res.json({ result: "❌ AI не ответил" });
 
     } catch (error) {
 
-        console.log("SERVER ERROR:", error);
+        console.log(error);
 
         res.json({
             result: "❌ Ошибка сервера"
@@ -94,8 +93,4 @@ app.post("/generate", async (req, res) => {
 
 });
 
-const PORT = process.env.PORT || 3001;
-
-app.listen(PORT, () => {
-    console.log(`🚀 HF STABLE server started on ${PORT}`);
-});
+app.listen(3001, () => console.log("🚀 AI LIMIT SERVER"));
