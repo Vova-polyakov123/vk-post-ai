@@ -14,7 +14,7 @@ const API_KEY = process.env.HF_API_KEY;
 
 // ✅ ПРОВЕРКА
 app.get("/", (req, res) => {
-    res.send("🔥 HF FINAL WORKING");
+    res.send("🔥 HF STABLE WORKING");
 });
 
 // 🚀 ГЕНЕРАЦИЯ
@@ -26,16 +26,28 @@ app.post("/generate", async (req, res) => {
             return res.json({ result: "❌ Нет HF ключа" });
         }
 
-        const { topic } = req.body;
+        const { topic, type, category } = req.body;
 
         if (!topic) {
             return res.json({ result: "❌ Введи тему" });
         }
 
-        const prompt = `Напиши красивый пост для ВКонтакте на тему: ${topic}. Добавь эмоции и призыв к действию.`;
+        let prompt = "";
+
+        if (type === "post") {
+            prompt = `Напиши пост для ВКонтакте. Тема: ${topic}`;
+        } else if (type === "ads") {
+            prompt = `Напиши рекламный пост. Тема: ${topic}`;
+        } else if (type === "ideas") {
+            prompt = `Дай 10 идей постов: ${topic}`;
+        } else if (type === "hashtags") {
+            prompt = `Напиши 15 хештегов: ${topic}`;
+        } else {
+            prompt = `Напиши текст: ${topic}`;
+        }
 
         const response = await fetch(
-            "https://router.huggingface.co/v1/chat/completions",
+            "https://router.huggingface.co/hf-inference/models/google/flan-t5-large",
             {
                 method: "POST",
                 headers: {
@@ -43,55 +55,26 @@ app.post("/generate", async (req, res) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    model: "mistralai/mistral-7b-instruct",
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt
-                        }
-                    ],
-                    max_tokens: 500
+                    inputs: prompt
                 })
             }
         );
 
         const data = await response.json();
 
-        console.log("HF RESPONSE:", JSON.stringify(data, null, 2));
+        console.log("HF STABLE:", data);
 
-        // 🔥 ПРАВИЛЬНАЯ ОБРАБОТКА ОШИБОК
+        // ❌ ошибка
         if (data?.error) {
-
-            // если строка
-            if (typeof data.error === "string") {
-                return res.json({
-                    result: "❌ HF ошибка: " + data.error
-                });
-            }
-
-            // если объект
-            if (data.error.message) {
-                return res.json({
-                    result: "❌ HF ошибка: " + data.error.message
-                });
-            }
-
             return res.json({
-                result: "❌ HF ошибка"
-            });
-        }
-
-        // ⏳ модель грузится
-        if (data?.estimated_time) {
-            return res.json({
-                result: "⏳ Модель загружается, попробуй через 10 секунд"
+                result: "❌ HF ошибка: " + data.error
             });
         }
 
         // ✅ ответ
-        if (data?.choices?.length > 0) {
+        if (Array.isArray(data) && data[0]?.generated_text) {
             return res.json({
-                result: data.choices[0].message.content
+                result: data[0].generated_text
             });
         }
 
@@ -114,5 +97,5 @@ app.post("/generate", async (req, res) => {
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-    console.log(`🚀 HF FINAL server started on ${PORT}`);
+    console.log(`🚀 HF STABLE server started on ${PORT}`);
 });
