@@ -8,9 +8,9 @@ export const App = () => {
   const [type, setType] = useState("post");
   const [category, setCategory] = useState("business");
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-
     bridge.send("VKWebAppInit");
 
     async function getUser() {
@@ -23,7 +23,6 @@ export const App = () => {
     }
 
     getUser();
-
   }, []);
 
   const generateContent = async () => {
@@ -32,6 +31,9 @@ export const App = () => {
       setResult("Введите тему");
       return;
     }
+
+    setLoading(true);
+    setResult("Генерация...");
 
     try {
 
@@ -58,8 +60,10 @@ export const App = () => {
     } catch (error) {
 
       console.log("Ошибка:", error);
-      setResult("Ошибка генерации. Сервер может просыпаться 30-60 секунд");
+      setResult("Ошибка генерации. Сервер может спать (подожди 30 сек)");
 
+    } finally {
+      setLoading(false);
     }
 
   };
@@ -75,51 +79,36 @@ export const App = () => {
       <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        style={{
-          padding: 10,
-          width: "100%",
-          marginBottom: 10
-        }}
+        style={{ padding: 10, width: "100%", marginBottom: 10 }}
       >
-
         <option value="business">Бизнес</option>
         <option value="humor">Юмор</option>
         <option value="news">Новости</option>
         <option value="motivation">Мотивация</option>
         <option value="tech">Технологии</option>
-
       </select>
 
       <input
         value={topic}
         onChange={(e) => setTopic(e.target.value)}
         placeholder="Введите тему"
-        style={{
-          padding: 10,
-          width: "100%",
-          marginBottom: 10
-        }}
+        style={{ padding: 10, width: "100%", marginBottom: 10 }}
       />
 
       <select
         value={type}
         onChange={(e) => setType(e.target.value)}
-        style={{
-          padding: 10,
-          width: "100%",
-          marginBottom: 10
-        }}
+        style={{ padding: 10, width: "100%", marginBottom: 10 }}
       >
-
         <option value="post">Пост</option>
         <option value="ideas">Идеи постов</option>
         <option value="hashtags">Хэштеги</option>
         <option value="ads">Реклама</option>
-
       </select>
 
       <button
         onClick={generateContent}
+        disabled={loading}
         style={{
           padding: 12,
           width: "100%",
@@ -127,12 +116,11 @@ export const App = () => {
           color: "white",
           border: "none",
           marginBottom: 20,
-          cursor: "pointer"
+          cursor: "pointer",
+          opacity: loading ? 0.6 : 1
         }}
       >
-
-        Сгенерировать
-
+        {loading ? "Генерация..." : "Сгенерировать"}
       </button>
 
       <div
@@ -143,9 +131,7 @@ export const App = () => {
           minHeight: 80
         }}
       >
-
         {result}
-
       </div>
 
     </div>
