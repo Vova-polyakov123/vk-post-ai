@@ -12,12 +12,12 @@ app.use(express.json());
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 
-// 🔍 проверка
+// 🔍 Проверка
 app.get("/", (req, res) => {
-    res.send("AI сервер работает 🚀 NEW VERSION");
+    res.send("🚀 AI сервер работает (FINAL)");
 });
 
-// 🚀 генерация
+// 🚀 Генерация
 app.post("/generate", async (req, res) => {
 
     try {
@@ -34,6 +34,7 @@ app.post("/generate", async (req, res) => {
 
         let prompt = "";
 
+        // 🔥 ЛОГИКА
         if (type === "post") {
             prompt = `
 Напиши вирусный пост для ВКонтакте.
@@ -44,9 +45,10 @@ app.post("/generate", async (req, res) => {
 Формат:
 🔥 Заголовок
 Текст (5-7 строк)
-📲 Призыв к действию
+📲 Призыв
 
-Только русский язык.
+Пиши ярко, с эмоциями и эмодзи.
+Только на русском языке.
 `;
         }
 
@@ -61,84 +63,79 @@ app.post("/generate", async (req, res) => {
 😱 Проблема
 🔥 Решение
 💰 Выгоды
-📲 Призыв
+📲 Призыв к действию
 
-Только русский язык.
+Только на русском языке.
 `;
         }
 
         else if (type === "ideas") {
-            prompt = `Дай 10 идей постов на тему: ${topic}`;
+            prompt = `
+Дай 10 идей постов для ВКонтакте на тему: ${topic}
+
+Кратко, списком.
+`;
         }
 
         else if (type === "hashtags") {
-            prompt = `Напиши 15 хештегов для темы: ${topic}`;
+            prompt = `
+Напиши 15 популярных хештегов для темы: ${topic}
+
+Только список.
+`;
         }
 
-        // ✅ ТОЛЬКО ЖИВЫЕ МОДЕЛИ (БЕЗ openchat)
-        const models = [
-            "meta-llama/llama-3-8b-instruct",
-            "mistralai/mistral-7b-instruct:free",
-            "google/gemma-7b-it:free"
-        ];
+        else {
+            prompt = `Напиши текст на тему: ${topic}`;
+        }
 
-        let result = null;
-        let lastError = null;
+        // ✅ ОДНА СТАБИЛЬНАЯ МОДЕЛЬ
+        const model = "meta-llama/llama-3-8b-instruct";
 
-        for (const model of models) {
-
-            try {
-
-                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${API_KEY}`,
-                        "Content-Type": "application/json"
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${API_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: model,
+                messages: [
+                    {
+                        role: "system",
+                        content: "Ты профессиональный SMM специалист. Пиши только на русском языке."
                     },
-                    body: JSON.stringify({
-                        model,
-                        messages: [
-                            {
-                                role: "system",
-                                content: "Ты SMM специалист. Пиши только на русском языке."
-                            },
-                            {
-                                role: "user",
-                                content: prompt
-                            }
-                        ],
-                        temperature: 0.9,
-                        max_tokens: 1000
-                    })
-                });
+                    {
+                        role: "user",
+                        content: prompt
+                    }
+                ],
+                temperature: 0.9,
+                max_tokens: 1000
+            })
+        });
 
-                const data = await response.json();
+        const data = await response.json();
 
-                console.log("MODEL:", model);
-                console.log("RESPONSE:", JSON.stringify(data, null, 2));
+        console.log("AI RESPONSE:", JSON.stringify(data, null, 2));
 
-                if (data?.choices?.length > 0) {
-                    result = data.choices[0].message.content.trim();
-                    break;
-                }
-
-                if (data?.error) {
-                    lastError = data.error.message;
-                }
-
-            } catch (err) {
-                lastError = err.message;
-            }
-        }
-
-        // ❌ если не получилось
-        if (!result) {
+        // ❌ ошибка от AI
+        if (data?.error) {
             return res.json({
-                result: `❌ AI не ответил\nПричина: ${lastError || "нет ответа"}`
+                result: "❌ Ошибка AI: " + data.error.message
             });
         }
 
-        res.json({ result });
+        // ✅ успех
+        if (data?.choices?.length > 0) {
+            const result = data.choices[0].message.content.trim();
+            return res.json({ result });
+        }
+
+        // ❌ если пусто
+        return res.json({
+            result: "❌ AI не вернул текст"
+        });
 
     } catch (error) {
 
