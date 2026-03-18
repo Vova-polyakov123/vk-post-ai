@@ -94,45 +94,59 @@ app.post("/generate", async (req, res) => {
             prompt = `Напиши текст на тему: ${topic}`;
         }
 
-        // 🔥 ЗАПРОС К AI
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "mistralai/mistral-7b-instruct", // ✅ стабильная модель
-                messages: [
-                    {
-                        role: "system",
-                        content: "Ты пишешь тексты только на русском языке для ВКонтакте."
-                    },
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ],
-                temperature: 0.8,
-                max_tokens: 800
-            })
-        });
-
-        const data = await response.json();
-
-        console.log("AI ответ:", JSON.stringify(data, null, 2));
+        // 🔥 СПИСОК МОДЕЛЕЙ (если одна не работает — берем следующую)
+        const models = [
+            "openchat/openchat-7b",
+            "meta-llama/llama-3-8b-instruct"
+        ];
 
         let result = "AI не смог сгенерировать текст";
 
-        // ✅ нормальный разбор ответа
-        if (data?.choices?.length > 0) {
-            result = data.choices[0].message.content.trim();
-        }
+        for (const model of models) {
 
-        // ❗ обработка ошибок API
-        if (data?.error) {
-            console.log("AI ERROR:", data.error);
-            result = "Ошибка AI: " + data.error.message;
+            try {
+
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${API_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "Ты пишешь тексты только на русском языке для ВКонтакте."
+                            },
+                            {
+                                role: "user",
+                                content: prompt
+                            }
+                        ],
+                        temperature: 0.8,
+                        max_tokens: 800
+                    })
+                });
+
+                const data = await response.json();
+
+                console.log("MODEL:", model);
+                console.log("AI ответ:", JSON.stringify(data, null, 2));
+
+                if (data?.choices?.length > 0) {
+                    result = data.choices[0].message.content.trim();
+                    break; // ✅ если сработало — выходим
+                }
+
+                if (data?.error) {
+                    console.log("Ошибка модели:", model, data.error.message);
+                }
+
+            } catch (err) {
+                console.log("Ошибка запроса модели:", model);
+            }
+
         }
 
         res.json({ result });
