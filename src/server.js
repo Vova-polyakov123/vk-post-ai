@@ -12,11 +12,12 @@ app.use(express.json());
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 
-// проверка
+// 🔍 проверка
 app.get("/", (req, res) => {
-    res.send("AI сервер работает");
+    res.send("AI сервер работает 🚀");
 });
 
+// 🚀 генерация
 app.post("/generate", async (req, res) => {
 
     try {
@@ -43,39 +44,51 @@ app.post("/generate", async (req, res) => {
 Формат:
 🔥 Заголовок
 Текст (5-7 строк)
-Призыв
+📲 Призыв к действию
 
-На русском языке.
+Пиши ярко, с эмоциями и эмодзи.
+Только на русском языке.
 `;
         }
 
         else if (type === "ads") {
             prompt = `
-Напиши МОЩНЫЙ рекламный пост для ВКонтакте.
+Напиши ПРОДАЮЩИЙ рекламный пост для ВКонтакте.
 
 Тема: ${topic}
 
 Формат:
 💥 Заголовок
-🔥 Боль + решение
+😱 Проблема клиента
+🔥 Решение
 💰 Выгоды
-📲 Призыв к действию
+📲 Призыв
 
-Только русский язык.
+Только на русском языке.
 `;
         }
 
         else if (type === "ideas") {
-            prompt = `Дай 10 идей постов на тему: ${topic}`;
+            prompt = `
+Дай 10 идей постов для ВКонтакте на тему: ${topic}
+
+Кратко, списком.
+`;
         }
 
         else if (type === "hashtags") {
-            prompt = `Напиши 15 хештегов для темы: ${topic}`;
+            prompt = `
+Напиши 15 популярных хештегов для темы: ${topic}
+
+Только хештеги.
+`;
         }
 
+        // ✅ ТОЛЬКО ЖИВЫЕ МОДЕЛИ
         const models = [
             "meta-llama/llama-3-8b-instruct",
-            "openchat/openchat-7b"
+            "mistralai/mistral-7b-instruct:free",
+            "google/gemma-7b-it:free"
         ];
 
         let result = null;
@@ -96,7 +109,7 @@ app.post("/generate", async (req, res) => {
                         messages: [
                             {
                                 role: "system",
-                                content: "Отвечай только на русском языке."
+                                content: "Ты профессиональный SMM-специалист. Пиши только на русском."
                             },
                             {
                                 role: "user",
@@ -127,7 +140,7 @@ app.post("/generate", async (req, res) => {
             }
         }
 
-        // 💥 если AI не ответил
+        // ❌ если ничего не сработало
         if (!result) {
             return res.json({
                 result: `❌ AI не ответил\nПричина: ${lastError || "нет ответа от моделей"}`
@@ -148,6 +161,7 @@ app.post("/generate", async (req, res) => {
 
 });
 
+// 🚀 запуск
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
