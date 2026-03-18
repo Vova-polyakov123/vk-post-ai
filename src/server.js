@@ -30,19 +30,26 @@ app.post("/generate", async (req, res) => {
 
         let prompt = "";
 
+        // 🔥 ПРАВИЛЬНАЯ ЛОГИКА
         if (type === "post") {
-            prompt = `Напиши интересный пост для ВКонтакте. Категория: ${category}. Тема: ${topic}`;
-        }
+            prompt = `
+Ты профессиональный SMM-специалист.
 
-        if (type === "ideas") {
+Напиши вирусный пост для ВКонтакте:
+- цепляющий заголовок
+- эмоции
+- эмодзи
+- простой стиль
+- призыв к действию
+
+Категория: ${category}
+Тема: ${topic}
+`;
+        } else if (type === "ideas") {
             prompt = `Дай 10 идей постов для ВКонтакте на тему ${topic}`;
-        }
-
-        if (type === "hashtags") {
+        } else if (type === "hashtags") {
             prompt = `Напиши популярные хештеги для темы ${topic}`;
-        }
-
-        if (type === "ads") {
+        } else if (type === "ads") {
             prompt = `Напиши рекламный текст для темы ${topic}`;
         }
 

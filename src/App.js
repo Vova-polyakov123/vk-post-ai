@@ -120,7 +120,7 @@ export const App = () => {
           opacity: loading ? 0.6 : 1
         }}
       >
-        {loading ? "Генерация..." : "Сгенерировать"}
+        {loading ? "⏳ Генерация..." : "Сгенерировать"}
       </button>
 
       <div
@@ -128,11 +128,24 @@ export const App = () => {
           background: "#f3f3f3",
           padding: 15,
           borderRadius: 10,
-          minHeight: 80
+          minHeight: 80,
+          whiteSpace: "pre-wrap"
         }}
       >
         {result}
       </div>
+
+      <button
+        onClick={() => navigator.clipboard.writeText(result)}
+        style={{
+          marginTop: 10,
+          padding: 10,
+          width: "100%",
+          cursor: "pointer"
+        }}
+      >
+        📋 Скопировать
+      </button>
 
     </div>
 
