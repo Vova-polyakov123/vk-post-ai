@@ -12,95 +12,74 @@ app.use(express.json());
 
 const API_KEY = process.env.OPENROUTER_API_KEY;
 
-// 🔍 проверка сервера
+// проверка
 app.get("/", (req, res) => {
     res.send("AI сервер работает");
 });
 
-// 🚀 генерация
 app.post("/generate", async (req, res) => {
 
     try {
 
         if (!API_KEY) {
-            return res.json({
-                result: "Ошибка: API ключ не найден"
-            });
+            return res.json({ result: "❌ Нет API ключа" });
         }
 
         const { topic, type, category } = req.body;
 
         if (!topic) {
-            return res.json({
-                result: "Ошибка: тема не указана"
-            });
+            return res.json({ result: "❌ Введи тему" });
         }
 
         let prompt = "";
 
-        // 🔥 ЛОГИКА ПРОМПТОВ
         if (type === "post") {
             prompt = `
-Ты профессиональный SMM-специалист.
-
-Напиши вирусный пост для ВКонтакте:
-- цепляющий заголовок
-- эмоции
-- эмодзи
-- простой стиль
-- призыв к действию
+Напиши ВИРУСНЫЙ пост для ВКонтакте.
 
 Категория: ${category}
 Тема: ${topic}
 
-Пиши ТОЛЬКО на русском языке.
-`;
-        }
+Формат:
+🔥 Заголовок
+Текст (5-7 строк)
+Призыв
 
-        else if (type === "ideas") {
-            prompt = `
-Дай 10 идей постов для ВКонтакте на тему: ${topic}
-
-Пиши кратко, списком.
 На русском языке.
-`;
-        }
-
-        else if (type === "hashtags") {
-            prompt = `
-Напиши 15 популярных хештегов для темы: ${topic}
-
-Только хештеги, без лишнего текста.
 `;
         }
 
         else if (type === "ads") {
             prompt = `
-Напиши полноценный рекламный пост для ВКонтакте НА РУССКОМ ЯЗЫКЕ.
-
-Требования:
-- мощный заголовок
-- 5-7 предложений
-- выгоды для клиента
-- эмоции
-- призыв к действию
-- без английского языка
+Напиши МОЩНЫЙ рекламный пост для ВКонтакте.
 
 Тема: ${topic}
+
+Формат:
+💥 Заголовок
+🔥 Боль + решение
+💰 Выгоды
+📲 Призыв к действию
+
+Только русский язык.
 `;
         }
 
-        else {
-            prompt = `Напиши текст на тему: ${topic}`;
+        else if (type === "ideas") {
+            prompt = `Дай 10 идей постов на тему: ${topic}`;
         }
 
-        // 🔥 СПИСОК МОДЕЛЕЙ (если одна не работает — берем следующую)
+        else if (type === "hashtags") {
+            prompt = `Напиши 15 хештегов для темы: ${topic}`;
+        }
+
         const models = [
-            "openchat/openchat-7b",
-            "meta-llama/llama-3-8b-instruct"
+            "meta-llama/llama-3-8b-instruct",
+            "openchat/openchat-7b"
         ];
 
-        let result = "AI не смог сгенерировать текст";
+        let result = null;
+        let lastError = null;
 
         for (const model of models) {
 
@@ -113,40 +92,46 @@ app.post("/generate", async (req, res) => {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({
-                        model: model,
+                        model,
                         messages: [
                             {
                                 role: "system",
-                                content: "Ты пишешь тексты только на русском языке для ВКонтакте."
+                                content: "Отвечай только на русском языке."
                             },
                             {
                                 role: "user",
                                 content: prompt
                             }
                         ],
-                        temperature: 0.8,
-                        max_tokens: 800
+                        temperature: 0.9,
+                        max_tokens: 1000
                     })
                 });
 
                 const data = await response.json();
 
                 console.log("MODEL:", model);
-                console.log("AI ответ:", JSON.stringify(data, null, 2));
+                console.log("RESPONSE:", JSON.stringify(data, null, 2));
 
                 if (data?.choices?.length > 0) {
                     result = data.choices[0].message.content.trim();
-                    break; // ✅ если сработало — выходим
+                    break;
                 }
 
                 if (data?.error) {
-                    console.log("Ошибка модели:", model, data.error.message);
+                    lastError = data.error.message;
                 }
 
             } catch (err) {
-                console.log("Ошибка запроса модели:", model);
+                lastError = err.message;
             }
+        }
 
+        // 💥 если AI не ответил
+        if (!result) {
+            return res.json({
+                result: `❌ AI не ответил\nПричина: ${lastError || "нет ответа от моделей"}`
+            });
         }
 
         res.json({ result });
@@ -156,16 +141,15 @@ app.post("/generate", async (req, res) => {
         console.log("SERVER ERROR:", error);
 
         res.json({
-            result: "Ошибка генерации сервера"
+            result: "❌ Ошибка сервера"
         });
 
     }
 
 });
 
-// 🚀 запуск
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
-    console.log(`AI сервер работает на порту ${PORT}`);
+    console.log(`🚀 Сервер запущен на ${PORT}`);
 });
