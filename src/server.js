@@ -6,20 +6,45 @@ import fetch from "node-fetch";
 dotenv.config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = process.env.OPENROUTER_API_KEY;
+// 🔑 ключи
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
+const HF_KEY = process.env.HF_API_KEY;
 
-// 💥 ХРАНИМ ЛИМИТЫ (по user_id)
-const userLimits = {};
+// 💾 база пользователей (временно в памяти)
+const users = {};
 
+// 🎁 бесплатные запросы
 const FREE_LIMIT = 3;
+
+// 💰 пакеты
+const PACKAGES = {
+    mini: 20,
+    pro: 100,
+    ultra: 300
+};
 
 // 🔥 проверка
 app.get("/", (req, res) => {
-    res.send("🔥 AI WITH LIMIT WORKING");
+    res.send("🔥 AI PRO SERVER WORKING");
+});
+
+// 💳 покупка
+app.post("/buy", (req, res) => {
+
+    const { userId, plan } = req.body;
+
+    if (!users[userId]) {
+        users[userId] = { requests: 0, freeUsed: 0 };
+    }
+
+    if (PACKAGES[plan]) {
+        users[userId].requests += PACKAGES[plan];
+    }
+
+    res.json({ success: true, balance: users[userId] });
 });
 
 // 🚀 генерация
@@ -37,53 +62,122 @@ app.post("/generate", async (req, res) => {
             return res.json({ result: "❌ Нет userId" });
         }
 
-        // 💥 считаем запросы
-        if (!userLimits[userId]) {
-            userLimits[userId] = 0;
+        if (!users[userId]) {
+            users[userId] = { requests: 0, freeUsed: 0 };
         }
 
-        userLimits[userId]++;
+        let usePro = false;
 
-        // ❌ если лимит превышен
-        if (userLimits[userId] > FREE_LIMIT) {
-            return res.json({
-                result: "💰 Бесплатные запросы закончились. Купи PRO доступ."
+        // 🎁 бесплатные попытки
+        if (users[userId].freeUsed < FREE_LIMIT) {
+            users[userId].freeUsed++;
+        } else {
+            // 💰 платные
+            if (users[userId].requests <= 0) {
+                return res.json({
+                    result: "💰 Бесплатные попытки закончились. Купи PRO.",
+                    freeLeft: 0,
+                    paidLeft: 0
+                });
+            }
+            users[userId].requests--;
+            usePro = true;
+        }
+
+        // 🔥 нормальный промпт
+        const prompt = `
+Ты профессиональный SMM-специалист.
+
+Напиши мощный пост для ВКонтакте:
+- цепляющий заголовок
+- эмоции
+- 5-7 строк
+- эмодзи
+- призыв к действию
+
+Тема: ${topic}
+
+Пиши строго на русском языке.
+`;
+
+        let result = "";
+
+        // =========================
+        // 💰 PRO (OpenRouter)
+        // =========================
+        if (usePro && OPENROUTER_KEY) {
+
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_KEY}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "meta-llama/llama-3-8b-instruct",
+                    messages: [
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.8,
+                    max_tokens: 800
+                })
             });
+
+            const data = await response.json();
+
+            if (data?.choices?.length > 0) {
+                result = data.choices[0].message.content;
+            } else {
+                result = "❌ PRO AI не ответил";
+            }
+
         }
 
-        const prompt = `Напиши пост для ВКонтакте на тему: ${topic}`;
+        // =========================
+        // 🆓 FREE (HuggingFace)
+        // =========================
+        else {
 
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${API_KEY}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "meta-llama/llama-3-8b-instruct",
-                messages: [
-                    {
-                        role: "user",
-                        content: prompt
-                    }
-                ]
-            })
+            const response = await fetch(
+                "https://router.huggingface.co/v1/chat/completions",
+                {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${HF_KEY}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: "google/gemma-2b-it",
+                        messages: [
+                            { role: "user", content: prompt }
+                        ],
+                        max_tokens: 500
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            console.log("HF:", data);
+
+            if (data?.choices?.length > 0) {
+                result = data.choices[0].message.content;
+            } else if (data?.error) {
+                result = "❌ HF ошибка: " + JSON.stringify(data.error);
+            } else {
+                result = "❌ FREE AI не ответил";
+            }
+        }
+
+        res.json({
+            result,
+            freeLeft: Math.max(0, FREE_LIMIT - users[userId].freeUsed),
+            paidLeft: users[userId].requests
         });
-
-        const data = await response.json();
-
-        if (data?.choices?.length > 0) {
-            return res.json({
-                result: data.choices[0].message.content,
-                remaining: FREE_LIMIT - userLimits[userId]
-            });
-        }
-
-        res.json({ result: "❌ AI не ответил" });
 
     } catch (error) {
 
-        console.log(error);
+        console.log("SERVER ERROR:", error);
 
         res.json({
             result: "❌ Ошибка сервера"
@@ -93,4 +187,8 @@ app.post("/generate", async (req, res) => {
 
 });
 
-app.listen(3001, () => console.log("🚀 AI LIMIT SERVER"));
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+    console.log(`🚀 SERVER STARTED ON ${PORT}`);
+});
