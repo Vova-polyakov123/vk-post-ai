@@ -12,12 +12,12 @@ app.use(express.json());
 
 const API_KEY = process.env.HF_API_KEY;
 
-// проверка
+// 🔍 проверка
 app.get("/", (req, res) => {
-    res.send("🚀 AI сервер (HuggingFace) работает");
+    res.send("🚀 HF AI SERVER WORKING");
 });
 
-// генерация
+// 🚀 генерация
 app.post("/generate", async (req, res) => {
 
     try {
@@ -34,23 +34,65 @@ app.post("/generate", async (req, res) => {
 
         let prompt = "";
 
+        // 🔥 УЛУЧШЕННЫЕ ПРОМПТЫ
         if (type === "post") {
-            prompt = `Напиши вирусный пост ВКонтакте. Категория: ${category}. Тема: ${topic}`;
+            prompt = `
+Ты SMM специалист.
+
+Напиши ВИРУСНЫЙ пост для ВКонтакте.
+
+Категория: ${category}
+Тема: ${topic}
+
+Сделай:
+- яркий заголовок
+- 5-6 коротких строк
+- эмоции
+- эмодзи
+- призыв к действию
+
+Пиши на русском языке.
+`;
         }
 
         else if (type === "ads") {
-            prompt = `Напиши продающий рекламный текст ВКонтакте. Тема: ${topic}`;
+            prompt = `
+Напиши продающий рекламный пост.
+
+Тема: ${topic}
+
+Структура:
+💥 Заголовок
+😱 Проблема
+🔥 Решение
+💰 Выгоды
+📲 Призыв
+
+На русском языке.
+`;
         }
 
         else if (type === "ideas") {
-            prompt = `Дай 10 идей постов: ${topic}`;
+            prompt = `
+Дай 10 идей постов на тему: ${topic}
+
+Коротко, списком.
+`;
         }
 
         else if (type === "hashtags") {
-            prompt = `Напиши 15 хештегов: ${topic}`;
+            prompt = `
+Напиши 15 популярных хештегов для темы: ${topic}
+
+Только список.
+`;
         }
 
-        // 🔥 бесплатная модель HF
+        else {
+            prompt = `Напиши текст на тему: ${topic}`;
+        }
+
+        // 🔥 ЛУЧШАЯ БЕСПЛАТНАЯ МОДЕЛЬ HF
         const response = await fetch(
             "https://api-inference.huggingface.co/models/google/flan-t5-large",
             {
@@ -60,29 +102,40 @@ app.post("/generate", async (req, res) => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    inputs: prompt
+                    inputs: prompt,
+                    parameters: {
+                        max_new_tokens: 300,
+                        temperature: 0.9
+                    }
                 })
             }
         );
 
         const data = await response.json();
 
-        console.log("HF RESPONSE:", data);
+        console.log("HF RESPONSE:", JSON.stringify(data, null, 2));
 
+        // ❌ ошибка HF
         if (data.error) {
             return res.json({
-                result: "❌ Ошибка HF: " + data.error
+                result: "❌ HF ошибка: " + data.error
             });
         }
 
+        // ✅ нормальный ответ
         if (Array.isArray(data) && data[0]?.generated_text) {
+            let text = data[0].generated_text;
+
+            // ✨ чуть чистим ответ
+            text = text.replace(prompt, "").trim();
+
             return res.json({
-                result: data[0].generated_text
+                result: text || "❌ Пустой ответ от AI"
             });
         }
 
         return res.json({
-            result: "❌ AI не смог сгенерировать"
+            result: "❌ AI не смог сгенерировать текст"
         });
 
     } catch (error) {
@@ -97,6 +150,7 @@ app.post("/generate", async (req, res) => {
 
 });
 
+// 🚀 запуск
 const PORT = process.env.PORT || 3001;
 
 app.listen(PORT, () => {
