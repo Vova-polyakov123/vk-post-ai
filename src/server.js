@@ -34,7 +34,6 @@ app.post("/generate", async (req, res) => {
 
         const prompt = `Напиши красивый пост для ВКонтакте на тему: ${topic}. Добавь эмоции и призыв к действию.`;
 
-        // ❗ ТОЛЬКО НОВЫЙ API (без старых ссылок)
         const response = await fetch(
             "https://router.huggingface.co/v1/chat/completions",
             {
@@ -58,14 +57,38 @@ app.post("/generate", async (req, res) => {
 
         const data = await response.json();
 
-        console.log("HF FINAL RESPONSE:", JSON.stringify(data, null, 2));
+        console.log("HF RESPONSE:", JSON.stringify(data, null, 2));
 
+        // 🔥 ПРАВИЛЬНАЯ ОБРАБОТКА ОШИБОК
         if (data?.error) {
+
+            // если строка
+            if (typeof data.error === "string") {
+                return res.json({
+                    result: "❌ HF ошибка: " + data.error
+                });
+            }
+
+            // если объект
+            if (data.error.message) {
+                return res.json({
+                    result: "❌ HF ошибка: " + data.error.message
+                });
+            }
+
             return res.json({
-                result: "❌ HF ошибка: " + data.error.message
+                result: "❌ HF ошибка"
             });
         }
 
+        // ⏳ модель грузится
+        if (data?.estimated_time) {
+            return res.json({
+                result: "⏳ Модель загружается, попробуй через 10 секунд"
+            });
+        }
+
+        // ✅ ответ
         if (data?.choices?.length > 0) {
             return res.json({
                 result: data.choices[0].message.content
