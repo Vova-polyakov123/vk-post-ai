@@ -33,7 +33,7 @@ export const App = () => {
     }
 
     setLoading(true);
-    setResult("Генерация...");
+    setResult("⏳ Генерация...");
 
     try {
 
@@ -64,6 +64,26 @@ export const App = () => {
 
     } finally {
       setLoading(false);
+    }
+
+  };
+
+  // 🔥 СТОРИС
+  const shareToStory = async () => {
+
+    if (!result) {
+      alert("Сначала сгенерируй текст");
+      return;
+    }
+
+    try {
+      await bridge.send("VKWebAppShowStoryBox", {
+        background_type: "image",
+        url: "https://via.placeholder.com/1080x1920.png?text=AI+POST",
+        text: result.slice(0, 200)
+      });
+    } catch (e) {
+      console.log("Ошибка сторис:", e);
     }
 
   };
@@ -145,6 +165,21 @@ export const App = () => {
         }}
       >
         📋 Скопировать
+      </button>
+
+      <button
+        onClick={shareToStory}
+        style={{
+          marginTop: 10,
+          padding: 12,
+          width: "100%",
+          background: "#4caf50",
+          color: "white",
+          border: "none",
+          cursor: "pointer"
+        }}
+      >
+        📲 Поделиться в сторис
       </button>
 
     </div>
