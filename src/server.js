@@ -13,8 +13,15 @@ app.use(express.json());
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY;
 const HF_KEY = process.env.HF_API_KEY;
 
-// 💾 база пользователей
-const users = {};
+// 💾 база пользователей (один демо пользователь)
+const users = {
+    demo_user: {
+        requests: 0,
+        freeUsed: 0
+    }
+};
+
+const USER_ID = "demo_user";
 
 // 🎁 бесплатные
 const FREE_LIMIT = 3;
@@ -28,26 +35,21 @@ const PACKAGES = {
 
 // 🔥 проверка
 app.get("/", (req, res) => {
-    res.send("🔥 AI FINAL WORKING");
+    res.send("🔥 AI ULTRA WORKING");
 });
 
 // 💳 покупка
 app.post("/buy", (req, res) => {
 
-    const { userId, plan } = req.body;
-    const id = userId || "demo_user";
-
-    if (!users[id]) {
-        users[id] = { requests: 0, freeUsed: 0 };
-    }
+    const { plan } = req.body;
 
     if (PACKAGES[plan]) {
-        users[id].requests += PACKAGES[plan];
+        users[USER_ID].requests += PACKAGES[plan];
     }
 
     res.json({
         success: true,
-        balance: users[id]
+        balance: users[USER_ID]
     });
 });
 
@@ -56,33 +58,26 @@ app.post("/generate", async (req, res) => {
 
     try {
 
-        const { topic, userId } = req.body;
+        const { topic } = req.body;
 
         if (!topic) {
             return res.json({ result: "❌ Введи тему" });
         }
 
-        const id = userId || "demo_user";
-
-        if (!users[id]) {
-            users[id] = { requests: 0, freeUsed: 0 };
-        }
-
         let usePro = false;
 
-        // 🎁 FREE
-        if (users[id].freeUsed < FREE_LIMIT) {
-            users[id].freeUsed++;
+        // 🎁 бесплатные
+        if (users[USER_ID].freeUsed < FREE_LIMIT) {
+            users[USER_ID].freeUsed++;
         } else {
-            // 💰 PRO
-            if (users[id].requests <= 0) {
+            if (users[USER_ID].requests <= 0) {
                 return res.json({
                     result: "💰 Лимит закончился. Купи пакет.",
                     freeLeft: 0,
                     paidLeft: 0
                 });
             }
-            users[id].requests--;
+            users[USER_ID].requests--;
             usePro = true;
         }
 
@@ -102,12 +97,10 @@ app.post("/generate", async (req, res) => {
         let result = "";
 
         // =========================
-        // 💰 PRO
+        // 💰 PRO (OpenRouter)
         // =========================
         if (usePro && OPENROUTER_KEY) {
-
             try {
-
                 const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                     method: "POST",
                     headers: {
@@ -136,20 +129,17 @@ app.post("/generate", async (req, res) => {
                 console.log("PRO ERROR:", e);
                 result = "❌ Ошибка PRO";
             }
-
         }
 
         // =========================
-        // 🆓 FREE
+        // 🆓 FREE (HF)
         // =========================
         if (!result) {
 
             if (!HF_KEY) {
                 result = "❌ Нет HF ключа";
             } else {
-
                 try {
-
                     const response = await fetch(
                         "https://router.huggingface.co/v1/chat/completions",
                         {
@@ -189,8 +179,8 @@ app.post("/generate", async (req, res) => {
 
         res.json({
             result,
-            freeLeft: Math.max(0, FREE_LIMIT - users[id].freeUsed),
-            paidLeft: users[id].requests
+            freeLeft: Math.max(0, FREE_LIMIT - users[USER_ID].freeUsed),
+            paidLeft: users[USER_ID].requests
         });
 
     } catch (error) {
