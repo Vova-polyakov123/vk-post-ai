@@ -1,16 +1,260 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=no, viewport-fit=cover"
-    />
-    <title>VK Mini App Boilerplate</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
-</html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>AI Контент Студия</title>
+
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(180deg, #eef2f7, #f9fbff);
+    }
+
+    .container {
+      max-width: 420px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 15px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .top {
+      background: linear-gradient(135deg, #ff7a00, #ffb347);
+      color: white;
+      border-radius: 16px;
+      padding: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .grid button {
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      color: white;
+      font-weight: bold;
+    }
+
+    .btn-orange {
+      background: #ff7a00;
+    }
+
+    .btn-green {
+      background: #2ecc71;
+    }
+
+    .btn-blue {
+      background: #4a90e2;
+    }
+
+    .btn-purple {
+      background: #8e44ad;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+
+    .generate {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff7a00, #ff3d00);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .actions button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    .limit {
+      font-size: 14px;
+      color: gray;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div style="font-size:24px;">🤖</div>
+      <h1 style="margin:0; font-size:20px;">AI Контент Студия</h1>
+    </div>
+
+    <h2 id="hello" style="margin:10px 0 0 0;">Загрузка...</h2>
+    <p>🔥 Сегодня +3 генерации бесплатно</p>
+  </div>
+
+  <div class="grid">
+    <button class="btn-orange" onclick="setMode('ads')">📢 Реклама</button>
+    <button class="btn-green" onclick="setMode('sales')">💰 Продажи</button>
+    <button class="btn-blue" onclick="setMode('idea')">🧠 Идея</button>
+    <button class="btn-purple" onclick="setMode('post')">✍️ Пост</button>
+  </div>
+
+  <div class="card">
+    <input id="idea" placeholder="💡 Введи идею..." />
+    <button class="generate" onclick="generate()">🔥 СГЕНЕРИРОВАТЬ</button>
+  </div>
+
+  <div class="card">
+    <h3>📄 Твой текст:</h3>
+    <div id="result">Здесь появится результат</div>
+
+    <div class="actions">
+      <button onclick="copyText()">📋 Копировать</button>
+      <button onclick="shareStory()">📤 В сторис</button>
+      <button onclick="improve()">✨ Улучшить</button>
+    </div>
+
+    <div class="limit" id="limitText"></div>
+  </div>
+
+  <div class="card">
+    <b>💎 Платные функции</b>
+    <p>10 генераций — 10 голосов</p>
+    <button onclick="buy()">Купить</button>
+  </div>
+
+  </div>
+
+  <script>
+    let user = { id: 0 };
+    let mode = "post";
+    let free = 3;
+
+    window.onload = async () => {
+      try {
+        await vkBridge.send("VKWebAppInit");
+        const data = await vkBridge.send("VKWebAppGetUserInfo");
+        user = data;
+        document.getElementById("hello").innerText =
+          "Привет, " + user.first_name;
+      } catch {
+        document.getElementById("hello").innerText = "Привет 👋";
+      }
+
+      updateLimit();
+    };
+
+    function setMode(m) {
+      mode = m;
+    }
+
+    function updateLimit() {
+      document.getElementById("limitText").innerText =
+        "🔥 Осталось: " + free + " генерации";
+    }
+
+    async function generate() {
+      const idea = document.getElementById("idea").value;
+      const result = document.getElementById("result");
+
+      if (!idea) {
+        result.innerText = "Введите идею!";
+        return;
+      }
+
+      if (free <= 0) {
+        result.innerText = "💰 Лимит закончился";
+        return;
+      }
+
+      free--;
+      updateLimit();
+
+      let prompt = "";
+
+      if (mode === "post") prompt = "Напиши пост: " + idea;
+      if (mode === "ads") prompt = "Сделай рекламу: " + idea;
+      if (mode === "idea") prompt = "Бизнес идея: " + idea;
+      if (mode === "sales") prompt = "Продающий текст: " + idea;
+
+      result.innerText = "Генерация...";
+
+      try {
+        const res = await fetch("https://vk-post-ai.onrender.com/generate", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            topic: idea,
+            type: mode,
+            category: "business"
+          })
+        });
+
+        const data = await res.json();
+
+        result.innerText = data.result || "Ошибка генерации";
+      } catch (e) {
+        result.innerText = "Ошибка соединения с сервером";
+      }
+    }
+
+    function copyText() {
+      const text = document.getElementById("result").innerText;
+      navigator.clipboard.writeText(text);
+      alert("Скопировано!");
+    }
+
+    function shareStory() {
+      const text = document.getElementById("result").innerText;
+
+      vkBridge.send("VKWebAppShowStoryBox", {
+        background_type: "image",
+        url: "https://mini-app-delta-roan.vercel.app",
+        stickers: [{
+          sticker_type: "renderable",
+          text: text.substring(0, 200)
+        }]
+      });
+    }
+
+    function improve() {
+      const current = document.getElementById("result").innerText;
+      document.getElementById("idea").value = current;
+      generate();
+    }
+
+    function buy() {
+      vkBridge.send("VKWebAppOpenPayForm", {
+        app_id: 12345678, // ⚠️ 54474085
+        action: "pay-to-service",
+        params: {
+          amount: 15, // ✅ теперь 15 голосов
+          description: "15 генераций"
+        }
+      });
+    }
+  </script>
