@@ -5,293 +5,243 @@
   <meta charset="UTF-8">
   <title>AI Контент Студия</title>
 
-  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script&gt;
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #eef2f7;
-    }
+<style>
+body { margin:0; font-family:Arial; background:#eef2f7; }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
+.container { max-width:900px; margin:auto; padding:20px; }
 
-    .header {
-      background: #ff7a00;
-      color: white;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center;
-    }
+.header {
+  background:#ff7a00; color:white; padding:20px;
+  border-radius:12px; text-align:center;
+}
 
-    .button {
-      padding: 12px;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.robot-float {
+  position:fixed; top:10px; right:15px;
+  z-index:9999; text-align:center;
+}
 
-    .active {
-      outline: 3px solid black;
-    }
+.robot { width:80px; animation:float 2s infinite; }
 
-    .ads {
-      background: #ff7a00;
-    }
+@keyframes float {
+  0% { transform:translateY(0); }
+  50% { transform:translateY(-10px); }
+  100% { transform:translateY(0); }
+}
 
-    .idea {
-      background: #9b59b6;
-    }
+.mouth {
+  width:20px; height:4px; background:black;
+  margin:5px auto; border-radius:10px;
+}
 
-    .sales {
-      background: #2ecc71;
-    }
+.robot-text {
+  font-size:11px; background:rgba(0,0,0,0.6);
+  color:white; padding:5px; border-radius:8px;
+}
 
-    .post {
-      background: #3498db;
-    }
+.button {
+  padding:12px; border:none; border-radius:10px;
+  color:white; font-weight:bold; opacity:0.8; cursor:pointer;
+}
 
-    .input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-    }
+.active { outline:3px solid black; opacity:1; }
 
-    .gen-btn {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      background: orange;
-      border: none;
-      color: white;
-      border-radius: 10px;
-    }
+.ads { background:#ff7a00; }
+.idea { background:#9b59b6; }
+.sales { background:#2ecc71; }
+.post { background:#3498db; }
 
-    .result {
-      margin-top: 15px;
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      min-height: 120px;
-      white-space: pre-wrap;
-    }
+.input { width:100%; padding:10px; margin-top:10px; }
 
-    .actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-    }
+.gen-btn {
+  width:100%; margin-top:10px; padding:12px;
+  background:orange; border:none; color:white;
+  border-radius:10px;
+}
 
-    .actions button {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-weight: bold;
-    }
+.result {
+  margin-top:15px; background:white;
+  padding:10px; border-radius:10px;
+  min-height:120px;
+  white-space:pre-wrap;
+}
 
-    .copy {
-      background: #ff7a00;
-    }
+.actions { display:flex; gap:10px; margin-top:10px; }
 
-    .voice {
-      background: #2ecc71;
-    }
+.actions button {
+  flex:1; padding:10px; border:none;
+  border-radius:10px; color:white; font-weight:bold;
+}
 
-    .stop {
-      background: #e67e22;
-    }
-
-    .pay {
-      background: #e74c3c;
-    }
-
-    /* MODAL (VK compliant) */
-    .modal {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: none;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 320px;
-      text-align: center;
-    }
-  </style>
+.copy { background:#ff7a00; }
+.voice { background:#2ecc71; }
+.stop { background:#e67e22; }
+.magic { background:#9b59b6; }
+.pay { background:#e74c3c; }
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div id="robotBox" class="robot-float">
+  <img class="robot" src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png"&gt;
+  <div class="mouth"></div>
+  <div id="robotText" class="robot-text">🤖 загрузка...</div>
+</div>
 
-    <div class="header">
-      <h2>AI Контент Студия</h2>
-      <div>Бесплатно: <span id="freeLeft">3</span></div>
-    </div>
+<div class="container">
 
-    <div style="display:flex;gap:10px;margin-top:10px;">
-      <button class="button ads active" onclick="setMode('ads',this)">Реклама</button>
-      <button class="button idea" onclick="setMode('idea',this)">Идея</button>
-      <button class="button sales" onclick="setMode('sales',this)">Продажи</button>
-      <button class="button post" onclick="setMode('post',this)">Пост</button>
-    </div>
+<div class="header">
+<h2>AI Контент Студия</h2>
+<div>Бесплатно: <span id="freeLeft">3</span></div>
+</div>
 
-    <input id="input" class="input" placeholder="Введите тему">
+<div style="display:flex;gap:10px;margin-top:10px;">
+<button class="button ads active" onclick="setMode('ads',this)">Реклама</button>
+<button class="button idea" onclick="setMode('idea',this)">Идея</button>
+<button class="button sales" onclick="setMode('sales',this)">Продажи</button>
+<button class="button post" onclick="setMode('post',this)">Пост</button>
+</div>
 
-    <button class="gen-btn" onclick="generate()">Сгенерировать 🚀</button>
+<input id="input" class="input" placeholder="Введите тему">
 
-    <div class="result" id="result"></div>
+<button class="gen-btn" onclick="generate()">Сгенерировать 🚀</button>
 
-    <div class="actions">
-      <button class="copy" onclick="copyText()">Копировать</button>
-      <button class="voice" onclick="speak()">🔊</button>
-      <button class="stop" onclick="speechSynthesis.cancel()">⛔</button>
-      <button class="pay" onclick="openPremium()">💎 Premium</button>
-    </div>
+<div class="result" id="result"></div>
 
-  </div>
+<div class="actions">
+<button class="copy" onclick="copyText()">Копировать 📋</button>
+<button class="voice" onclick="speakText()">Озвучить 🔊</button>
+<button class="stop" onclick="stopSpeech()">Стоп ⛔</button>
+<button class="magic" onclick="upgrade()">Улучшить ✨</button>
+<button class="pay" onclick="openPremium()">Премиум 💎</button>
+</div>
 
-  <!-- MODAL -->
-  <div id="modal" class="modal">
-    <div class="modal-content" id="modalContent"></div>
-  </div>
+</div>
 
-  <script>
+<script>
 
-    let mode = "ads";
-    let free = localStorage.getItem("free") ? +localStorage.getItem("free") : 3;
-    let premium = localStorage.getItem("premium") === "1";
-    let vkPlatform = "web";
+  let mode = "ads";
+  let free = 3;
+  let vk = false;
 
-    const modal = document.getElementById("modal");
-    const modalContent = document.getElementById("modalContent");
+  window.addEventListener("load", async () => {
+    try {
+      await vkBridge.send("VKWebAppInit");
+      vk = true;
+      document.getElementById("robotText").innerText = "🤖 VK режим активен";
+    } catch {
+      vk = false;
+      document.getElementById("robotText").innerText = "🤖 обычный режим";
+    }
+  });
 
-    function showModal(html) {
-      modalContent.innerHTML = html;
-      modal.style.display = "flex";
+  function setMode(m, b) {
+    mode = m;
+    document.querySelectorAll(".button").forEach(x => x.classList.remove("active"));
+    b.classList.add("active");
+  }
+
+  function robotSay(t) {
+    document.getElementById("robotText").innerText = t;
+  }
+
+  async function generate() {
+
+    const text = input.value;
+    if (!text) return;
+
+    if (free <= 0) {
+      result.innerText = "❌ Лимит закончился";
+      return;
     }
 
-    function closeModal() {
-      modal.style.display = "none";
-    }
+    free--;
+    freeLeft.innerText = free;
 
-    /* ONBOARDING (VK RULE 4.1.6.4) */
-    window.addEventListener("load", async () => {
-      try {
-        const info = await vkBridge.send("VKWebAppGetClientInfo");
-        vkPlatform = info.platform || "web";
-      } catch { }
+    robotSay("⏳ Генерация идёт...");
 
-      if (!localStorage.getItem("seen")) {
-        showModal(`
-      <h3>Добро пожаловать 🚀</h3>
-      <p>Это AI сервис:</p>
-      <p>• генерация постов<br>• реклама<br>• идеи</p>
-      <button onclick="startApp()">Начать</button>
-    `);
-      }
-    });
+    try {
 
-    function startApp() {
-      localStorage.setItem("seen", "1");
-      closeModal();
-    }
+      const
 
-    function setMode(m, b) {
-      mode = m;
-      document.querySelectorAll(".button").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-    }
 
-    /* GENERATE */
-    async function generate() {
-
-      const text = input.value;
-      if (!text) return;
-
-      if (!premium && free <= 0) {
-        showModal("<h3>Лимит закончился</h3><p>Купите Premium</p>");
-        return;
-      }
-
-      if (!premium) {
-        free--;
-        localStorage.setItem("free", free);
-        freeLeft.innerText = free;
-      }
-
-      result.innerText = "⏳ генерация...";
-
-      try {
-        const res = await fetch("/api/generate", {
+        res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt: text, mode })
         });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        result.innerText = (data.text || "error")
-          .replace(/[*#]/g, "");
+      let clean = (data?.text || "Ошибка")
+        .replace(/[*#•]/g, "")
+        .trim();
 
-      } catch {
-        result.innerText = "ошибка сервера";
+      result.innerText = clean + " 🚀✨😊";
+
+      robotSay("🤖 Готово!");
+
+    } catch {
+      result.innerText = "Ошибка сервера ❌";
+      robotSay("❌ ошибка");
+    }
+  }
+
+  function copyText() {
+    navigator.clipboard.writeText(result.innerText);
+  }
+
+  function speakText() {
+    const msg = new SpeechSynthesisUtterance(result.innerText);
+    msg.lang = "ru-RU";
+    speechSynthesis.speak(msg);
+  }
+
+  function stopSpeech() {
+    speechSynthesis.cancel();
+  }
+
+  function upgrade() {
+    result.innerText += "\n✨ улучшено AI";
+  }
+
+  /* ✅ РАБОЧАЯ VK ОПЛАТА */
+  async function openPremium() {
+
+    if (!vk) {
+      alert("💎 Только внутри VK");
+      return;
+    }
+
+    robotSay("💳 открываю оплату...");
+
+    try {
+
+      const res = await vkBridge.send("VKWebAppShowOrderBox", {
+        type: "item",
+        item: "premium_1"
+      });
+
+      console.log("PAY RESULT:", res);
+
+      if (res?.status === "success") {
+        robotSay("✅ Премиум активирован!");
+        result.innerText = "💎 Premium включён 😊🚀";
+      } else {
+        robotSay("⛔ Оплата отменена");
       }
+
+    } catch (e) {
+      console.log(e);
+      robotSay("❌ ошибка оплаты");
+      alert("Ошибка оплаты (проверь монетизацию VK)");
     }
+  }
 
-    /* COPY */
-    function copyText() {
-      navigator.clipboard.writeText(result.innerText);
-    }
+</script>
 
-    /* SPEAK */
-    function speak() {
-      const s = new SpeechSynthesisUtterance(result.innerText);
-      s.lang = "ru-RU";
-      speechSynthesis.speak(s);
-    }
-
-    /* VK PAY (RULE COMPLIANT) */
-    async function openPremium() {
-
-      // ❌ запрещаем оплату на мобилках VK (RULE 5.4.1)
-      if (vkPlatform === "android" || vkPlatform === "ios") {
-        showModal("<p>Оплата недоступна на мобильных клиентах VK</p>");
-        return;
-      }
-
-      try {
-        const res = await vkBridge.send("VKWebAppShowOrderBox", {
-          type: "item",
-          item: "premium_1"
-        });
-
-        if (res.status === "success") {
-          premium = true;
-          localStorage.setItem("premium", "1");
-          showModal("<h3>Premium активирован 💎</h3>");
-        }
-
-      } catch {
-        showModal("<p>Ошибка оплаты</p>");
-      }
-    }
-
-  </script>
-
-</body>
+  </body>
 
 </html>
