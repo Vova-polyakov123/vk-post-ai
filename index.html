@@ -28,6 +28,53 @@
       text-align: center;
     }
 
+    /* ROBOT */
+    .robot-box {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      text-align: center;
+      z-index: 9999;
+    }
+
+    .robot {
+      width: 80px;
+      transition: 0.3s;
+      animation: float 2s infinite;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+
+      100% {
+        transform: translateY(0);
+      }
+    }
+
+    .robot-mouth {
+      width: 20px;
+      height: 6px;
+      background: black;
+      margin: 5px auto;
+      border-radius: 10px;
+      transition: 0.3s;
+    }
+
+    .robot-text {
+      font-size: 11px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 5px;
+      border-radius: 8px;
+    }
+
+    /* UI */
     .button {
       padding: 12px;
       border: none;
@@ -115,7 +162,7 @@
       background: #e74c3c;
     }
 
-    /* MODAL (без alert — по правилам VK) */
+    /* MODAL */
     .modal {
       position: fixed;
       top: 0;
@@ -139,6 +186,14 @@
 </head>
 
 <body>
+
+  <!-- 🤖 ROBOT -->
+  <div class="robot-box">
+    <img id="robotImg" class="robot" src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
+
+    <div class="robot-mouth" id="robotMouth"></div>
+    <div class="robot-text" id="robotText">🤖 загрузка...</div>
+  </div>
 
   <div class="container">
 
@@ -180,27 +235,52 @@
     let free = 3;
     let vk = false;
 
+    /* ROBOT STATE */
+    function robot(state, text) {
+      const img = document.getElementById("robotImg");
+      const mouth = document.getElementById("robotMouth");
+
+      if (state === "happy") {
+        img.style.transform = "scale(1.05)";
+        mouth.style.background = "green";
+      }
+
+      if (state === "thinking") {
+        img.style.transform = "scale(0.95)";
+        mouth.style.background = "orange";
+      }
+
+      if (state === "sad") {
+        img.style.transform = "scale(1)";
+        mouth.style.background = "red";
+      }
+
+      document.getElementById("robotText").innerText = text;
+    }
+
     /* INIT VK */
     window.addEventListener("load", async () => {
       try {
         await vkBridge.send("VKWebAppInit");
         vk = true;
+        robot("happy", "🤖 VK режим активен");
       } catch {
         vk = false;
+        robot("sad", "🤖 оффлайн режим");
       }
 
-      updateUI();
       showOnboarding();
+      updateUI();
     });
 
-    /* ONBOARDING (VK RULE 4.1.6.4) */
+    /* ONBOARDING (VK RULE) */
     function showOnboarding() {
       if (localStorage.getItem("onboarded")) return;
 
       openModal(`
-    <h3>Добро пожаловать 🚀</h3>
-    <p>Создавай тексты для рекламы, постов и идей</p>
-    <p>3 бесплатные генерации каждый день</p>
+    <h3>👋 Добро пожаловать!</h3>
+    <p>Я помогу тебе создавать тексты для рекламы, постов и идей.</p>
+    <p>У тебя есть 3 бесплатные генерации.</p>
     <button onclick="closeModal()">Начать</button>
   `);
 
@@ -236,14 +316,15 @@
       if (!text) return;
 
       if (free <= 0) {
-        openModal("<h3>Лимит закончился</h3><p>Купи Premium для безлимита</p>");
+        robot("sad", "Лимит закончился 💔");
+        openModal("<h3>Лимит 0</h3><p>Купи Premium 💎</p>");
         return;
       }
 
       free--;
       updateUI();
 
-      result.innerText = "Генерация...";
+      robot("thinking", "🤖 думаю...");
 
       try {
 
@@ -259,8 +340,11 @@
           .replace(/[*#•]/g, "")
           .trim();
 
+        robot("happy", "Готово 🚀");
+
       } catch {
         result.innerText = "Ошибка сервера";
+        robot("sad", "ошибка ❌");
       }
     }
 
@@ -280,13 +364,15 @@
       speechSynthesis.cancel();
     }
 
-    /* VK PAY (ПРАВИЛЬНО) */
+    /* VK PAY */
     async function openPremium() {
 
       if (!vk) {
-        openModal("<h3>Ошибка</h3><p>Оплата доступна только внутри VK</p>");
+        openModal("<p>Только VK версия</p>");
         return;
       }
+
+      robot("thinking", "💳 открываю оплату...");
 
       try {
 
@@ -298,14 +384,14 @@
         if (res?.status === "success") {
           free = 999;
           updateUI();
-
-          openModal("<h3>💎 Premium активирован</h3><p>Теперь без лимитов</p>");
+          robot("happy", "Premium активен 💎");
+          openModal("<h3>💎 Premium включён</h3>");
         } else {
-          openModal("<p>Оплата отменена</p>");
+          robot("sad", "отмена оплаты");
         }
 
       } catch {
-        openModal("<p>Ошибка оплаты</p>");
+        robot("sad", "ошибка оплаты");
       }
     }
 
