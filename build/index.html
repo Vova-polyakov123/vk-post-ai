@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title>AI Контент Студия</title>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(180deg, #eef2f7, #f9fbff);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #ff7a00, #ffb347);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .logo {
+      height: 50px;
+    }
+
+    .buttons-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .button {
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      flex: 1;
+      opacity: 0.7;
+      transition: 0.2s;
+    }
+
+    .button.active {
+      opacity: 1;
+      transform: scale(1.05);
+      outline: 3px solid black;
+    }
+
+    .button-orange {
+      background: #ff7a00;
+    }
+
+    .button-green {
+      background: #2ecc71;
+    }
+
+    .button-blue {
+      background: #4a90e2;
+    }
+
+    .button-purple {
+      background: #8e44ad;
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+
+    .generate-button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #ff7a00, #ff3d00);
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .action-buttons button {
+      width: 32%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .action-button-copy {
+      background: #ff7a00;
+    }
+
+    .action-button-story {
+      background: #2ecc71;
+    }
+
+    .action-button-improve {
+      background: #4a90e2;
+    }
+
+    .packages {
+      margin-top: 30px;
+    }
+
+    .package {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .buy-btn {
+      background: #ff7a00;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+  <script async type="module" crossorigin src="./assets/index-6F3hq9O7.js"></script>
+  <script type="module">import.meta.url;import("_").catch(()=>1);(async function*(){})().next();if(location.protocol!="file:"){window.__vite_is_modern_browser=true}</script>
+  <script type="module">!function(){if(window.__vite_is_modern_browser)return;console.warn("vite: loading legacy chunks, syntax error above and the same error below should be ignored");var e=document.getElementById("vite-legacy-polyfill"),n=document.createElement("script");n.src=e.src,n.onload=function(){System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))},document.body.appendChild(n)}();</script>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <div class="header">
+      <img class="logo" src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
+      <h1>AI Контент Студия</h1>
+      <p id="hello">Привет 👋</p>
+      <p id="limitText">Осталось: 3 генерации</p>
+    </div>
+
+    <div class="buttons-container">
+      <button class="button button-orange active" onclick="setMode('ads', this)">Реклама</button>
+      <button class="button button-green" onclick="setMode('idea', this)">Идея</button>
+      <button class="button button-blue" onclick="setMode('sales', this)">Продажи</button>
+      <button class="button button-purple" onclick="setMode('post', this)">Пост</button>
+    </div>
+
+    <input id="idea" class="input-field" placeholder="Введи идею...">
+    <button class="generate-button" onclick="generate()">Старт Генерировать</button>
+
+    <div style="margin-top:20px">
+      <h3>Твой текст:</h3>
+      <div id="result">Здесь появится результат</div>
+
+      <div class="action-buttons" style="display:flex; gap:10px; margin-top:10px;">
+        <button class="action-button-copy" onclick="copyText()">Копировать</button>
+        <button class="action-button-story" onclick="shareStory()">В сторис</button>
+        <button class="action-button-improve" onclick="improve()">Улучшить</button>
+      </div>
+    </div>
+
+    <!-- 💰 ПАКЕТЫ -->
+    <div class="packages">
+      <h3>Купить генерации</h3>
+
+      <div class="package">
+        <span>Starter — 15 генераций / 30 голосов</span>
+        <button class="buy-btn" onclick="buyPackage('starter')">Купить</button>
+      </div>
+
+      <div class="package">
+        <span>Basic — 50 генераций / 100 голосов</span>
+        <button class="buy-btn" onclick="buyPackage('basic')">Купить</button>
+      </div>
+
+      <div class="package">
+        <span>Pro — 150 генераций / 300 голосов</span>
+        <button class="buy-btn" onclick="buyPackage('pro')">Купить</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let mode = "ads";
+    let free = 3;
+
+    window.onload = async () => {
+      await vkBridge.send("VKWebAppInit");
+
+      const saved = localStorage.getItem("free");
+      if (saved) free = parseInt(saved);
+
+      updateLimit();
+    };
+
+    function updateLimit() {
+      document.getElementById("limitText").innerText =
+        "Осталось: " + free + " генерации";
+    }
+
+    function setMode(m, btn) {
+      mode = m;
+      document.querySelectorAll(".button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    async function generate() {
+      const idea = document.getElementById("idea").value;
+
+      if (!idea) return alert("Введите идею");
+
+      if (free <= 0) return alert("Купи генерации");
+
+      free--;
+      localStorage.setItem("free", free);
+      updateLimit();
+
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: idea })
+      });
+
+      const data = await res.json();
+      document.getElementById("result").innerText = data.text;
+    }
+
+    function buyPackage(type) {
+      const packs = {
+        starter: { gen: 15, votes: 30 },
+        basic: { gen: 50, votes: 100 },
+        pro: { gen: 150, votes: 300 }
+      };
+
+      const p = packs[type];
+
+      vkBridge.send("VKWebAppOpenPayForm", {
+        app_id: 54474085,
+        action: "pay-to-service",
+        params: {
+          amount: p.votes,
+          description: type
+        }
+      });
+    }
+
+    vkBridge.subscribe((e) => {
+      if (e.detail.type === "VKWebAppOpenPayFormResult") {
+        if (e.detail.data.status === "success") {
+
+          const amount = e.detail.data.amount;
+
+          if (amount == 30) free += 15;
+          if (amount == 100) free += 50;
+          if (amount == 300) free += 150;
+
+          localStorage.setItem("free", free);
+          updateLimit();
+
+          alert("Оплата прошла ✅");
+        }
+      }
+    });
+
+    function copyText() {
+      navigator.clipboard.writeText(document.getElementById("result").innerText);
+    }
+
+    function shareStory() { }
+    function improve() { }
+  </script>
+
+  <script nomodule>!function(){var e=document,t=e.createElement("script");if(!("noModule"in t)&&"onbeforeload"in t){var n=!1;e.addEventListener("beforeload",(function(e){if(e.target===t)n=!0;else if(!e.target.hasAttribute("nomodule")||!n)return;e.preventDefault()}),!0),t.type="module",t.src=".",e.head.appendChild(t),t.remove()}}();</script>
+  <script nomodule crossorigin id="vite-legacy-polyfill" src="./assets/polyfills-legacy-Bj7NGYSK.js"></script>
+  <script nomodule crossorigin id="vite-legacy-entry" data-src="./assets/index-legacy-CnvmjJHj.js">System.import(document.getElementById('vite-legacy-entry').getAttribute('data-src'))</script>
+</body>
+
+</html>

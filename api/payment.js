@@ -1,0 +1,34 @@
+import { supabase } from "../supabase.js";
+
+export default async function handler(req, res) {
+    const { vk_id, package: pkg } = req.body;
+
+    const packs = {
+        starter: 15,
+        basic: 50,
+        pro: 150
+    };
+
+    if (!packs[pkg]) {
+        return res.status(400).json({ error: "bad package" });
+    }
+
+    const { data: user } = await supabase
+        .from("users")
+        .select("*")
+        .eq("vk_id", vk_id)
+        .single();
+
+    if (!user) {
+        return res.status(404).json({ error: "user not found" });
+    }
+
+    await supabase
+        .from("users")
+        .update({
+            paid: (user.paid || 0) + packs[pkg]
+        })
+        .eq("vk_id", vk_id);
+
+    return res.json({ ok: true });
+}

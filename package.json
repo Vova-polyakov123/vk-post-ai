@@ -13,6 +13,7 @@
     "deploy": "vite build && vk-miniapps-deploy"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.103.3",
     "@vkontakte/icons": "^3.1.1",
     "@vkontakte/vk-bridge": "^2.15.11",
     "@vkontakte/vk-bridge-react": "^1.0.1",
@@ -39,5 +40,18 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "terser": "^5.4.0",
     "vite": "^5.0.8"
-  }
+  },
+  "description": "Этот шаблон предоставляет базовый код и настройки для создания мини-приложения внутри ВКонтакте.   В качестве сборщика проекта выступает [Vite](https://vite-docs-ru.vercel.app/guide/), подробнее про его конфигурацию и дополнительные плагины можно прочитать [здесь](https://vite-docs-ru.vercel.app/config/) и [здесь]().",
+  "main": "supabase.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vova-polyakov123/vk-post-ai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Vova-polyakov123/vk-post-ai/issues"
+  },
+  "homepage": "https://github.com/Vova-polyakov123/vk-post-ai#readme"
 }

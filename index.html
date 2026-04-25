@@ -4,257 +4,428 @@
 <head>
   <meta charset="UTF-8">
   <title>AI Контент Студия</title>
-
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 
   <style>
     body {
       margin: 0;
       font-family: Arial;
-      background: linear-gradient(180deg, #eef2f7, #f9fbff);
+      background: #eef2f7
     }
 
     .container {
-      max-width: 420px;
+      max-width: 900px;
       margin: auto;
-      padding: 15px;
+      padding: 20px
     }
 
-    .card {
-      background: white;
-      border-radius: 16px;
-      padding: 15px;
-      margin-top: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    }
-
-    .top {
-      background: linear-gradient(135deg, #ff7a00, #ffb347);
-      color: white;
-      border-radius: 16px;
-      padding: 15px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .grid button {
-      border: none;
-      padding: 15px;
-      border-radius: 12px;
-      color: white;
-      font-weight: bold;
-    }
-
-    .btn-orange {
+    .header {
       background: #ff7a00;
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center
     }
 
-    .btn-green {
-      background: #2ecc71;
+    .robot-float {
+      position: fixed;
+      top: 10px;
+      right: 15px;
+      z-index: 9999;
+      text-align: center
     }
 
-    .btn-blue {
-      background: #4a90e2;
+    .robot {
+      width: 80px;
+      animation: float 2s infinite
     }
 
-    .btn-purple {
-      background: #8e44ad;
+    @keyframes float {
+      0% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-10px)
+      }
+
+      100% {
+        transform: translateY(0)
+      }
     }
 
-    input {
+    .mouth {
+      width: 20px;
+      height: 4px;
+      background: #000;
+      margin: 5px auto;
+      border-radius: 10px
+    }
+
+    .robot-text {
+      font-size: 11px;
+      background: rgba(0, 0, 0, .65);
+      color: #fff;
+      padding: 6px;
+      border-radius: 8px;
+      max-width: 180px
+    }
+
+    .button {
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: bold;
+      opacity: .85;
+      cursor: pointer
+    }
+
+    .active {
+      outline: 3px solid #000;
+      opacity: 1
+    }
+
+    .ads {
+      background: #ff7a00
+    }
+
+    .idea {
+      background: #9b59b6
+    }
+
+    .sales {
+      background: #2ecc71
+    }
+
+    .post {
+      background: #3498db
+    }
+
+    .input {
       width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 10px;
+      box-sizing: border-box
+    }
+
+    .gen-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 12px;
+      background: orange;
+      border: none;
+      color: #fff;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer
+    }
+
+    .result {
+      margin-top: 15px;
+      background: #fff;
       padding: 12px;
       border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
+      min-height: 120px;
+      white-space: pre-wrap
     }
 
-    .generate {
-      width: 100%;
-      padding: 14px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #ff7a00, #ff3d00);
-      color: white;
-      font-size: 16px;
-      font-weight: bold;
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px
     }
 
     .actions button {
-      width: 100%;
-      margin-top: 10px;
+      flex: 1;
       padding: 10px;
-      border-radius: 10px;
       border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer
     }
 
-    .limit {
-      font-size: 14px;
-      color: gray;
-      margin-top: 10px;
+    .copy {
+      background: #ff7a00
+    }
+
+    .voice {
+      background: #2ecc71
+    }
+
+    .stop {
+      background: #e67e22
+    }
+
+    .magic {
+      background: #9b59b6
+    }
+
+    .pay {
+      background: #e74c3c
+    }
+
+    .notice {
+      margin-top: 12px;
+      background: #fff;
+      padding: 10px;
+      border-radius: 10px;
+      color: #333
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000
+    }
+
+    .modal-box {
+      width: min(420px, 90vw);
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center
+    }
+
+    .modal-box button {
+      margin-top: 12px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 10px;
+      background: #ff7a00;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer
+    }
+
+    .hidden {
+      display: none !important
     }
   </style>
 </head>
 
 <body>
 
-  <div class="top">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <div style="font-size:24px;">🤖</div>
-      <h1 style="margin:0; font-size:20px;">AI Контент Студия</h1>
+  <div class="modal" id="modal">
+    <div class="modal-box">
+      <h3 id="modalTitle">Добро пожаловать 👋</h3>
+      <div id="modalText">
+        Это AI Контент Студия.<br><br>
+        Доступно:<br>
+        • Реклама<br>
+        • Идеи<br>
+        • Продажи<br>
+        • Посты
+      </div>
+      <button onclick="closeModal()">Понятно</button>
+    </div>
+  </div>
+
+  <div id="robotBox" class="robot-float">
+    <img class="robot" src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
+    <div class="mouth"></div>
+    <div id="robotText" class="robot-text">🤖 загрузка...</div>
+  </div>
+
+  <div class="container">
+
+    <div class="header">
+      <h2>AI Контент Студия</h2>
+      <div>Бесплатно: <span id="freeLeft">3</span></div>
     </div>
 
-    <h2 id="hello" style="margin:10px 0 0 0;">Загрузка...</h2>
-    <p>🔥 Сегодня +3 генерации бесплатно</p>
-  </div>
+    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
+      <button class="button ads active" onclick="setMode('ads',this)">Реклама</button>
+      <button class="button idea" onclick="setMode('idea',this)">Идея</button>
+      <button class="button sales" onclick="setMode('sales',this)">Продажи</button>
+      <button class="button post" onclick="setMode('post',this)">Пост</button>
+    </div>
 
-  <div class="grid">
-    <button class="btn-orange" onclick="setMode('ads')">📢 Реклама</button>
-    <button class="btn-green" onclick="setMode('sales')">💰 Продажи</button>
-    <button class="btn-blue" onclick="setMode('idea')">🧠 Идея</button>
-    <button class="btn-purple" onclick="setMode('post')">✍️ Пост</button>
-  </div>
+    <input id="input" class="input" placeholder="Введите тему">
+    <button class="gen-btn" onclick="generate()">Сгенерировать 🚀</button>
 
-  <div class="card">
-    <input id="idea" placeholder="💡 Введи идею..." />
-    <button class="generate" onclick="generate()">🔥 СГЕНЕРИРОВАТЬ</button>
-  </div>
-
-  <div class="card">
-    <h3>📄 Твой текст:</h3>
-    <div id="result">Здесь появится результат</div>
+    <div class="result" id="result"></div>
 
     <div class="actions">
-      <button onclick="copyText()">📋 Копировать</button>
-      <button onclick="shareStory()">📤 В сторис</button>
-      <button onclick="improve()">✨ Улучшить</button>
+      <button class="copy" onclick="copyText()">Копировать 📋</button>
+      <button class="voice" onclick="speakText()">Озвучить 🔊</button>
+      <button class="stop" onclick="stopSpeech()">Стоп ⛔</button>
+      <button class="magic" onclick="upgrade()">Улучшить ✨</button>
+      <button id="payBtn" class="pay" onclick="openPremium()">Премиум 💎</button>
     </div>
 
-    <div class="limit" id="limitText"></div>
-  </div>
-
-  <div class="card">
-    <b>💎 Платные функции</b>
-    <p>10 генераций — 10 голосов</p>
-    <button onclick="buy()">Купить</button>
-  </div>
+    <div class="notice">
+      Платная функция: Premium — безлимитная генерация контента.<br>
+      Оплата доступна только через одобренный способ оплаты VK в web-версии.
+    </div>
 
   </div>
 
   <script>
-    let user = { id: 0 };
-    let mode = "post";
-    let free = 3;
+    let mode = "ads";
+    let vk = false;
+    let vkPlatform = "web";
 
-    window.onload = async () => {
-      try {
-        await vkBridge.send("VKWebAppInit");
-        const data = await vkBridge.send("VKWebAppGetUserInfo");
-        user = data;
-        document.getElementById("hello").innerText =
-          "Привет, " + user.first_name;
-      } catch {
-        document.getElementById("hello").innerText = "Привет 👋";
-      }
+    const inputEl = document.getElementById("input");
+    const resultEl = document.getElementById("result");
+    const freeLeftEl = document.getElementById("freeLeft");
+    const robotTextEl = document.getElementById("robotText");
+    const payBtn = document.getElementById("payBtn");
 
-      updateLimit();
-    };
+    let free = Number(localStorage.getItem("free") || 3);
+    let premium = localStorage.getItem("premium") === "true";
+    freeLeftEl.textContent = premium ? "∞" : free;
 
-    function setMode(m) {
-      mode = m;
+    function robotSay(text) {
+      robotTextEl.textContent = text;
     }
 
-    function updateLimit() {
-      document.getElementById("limitText").innerText =
-        "🔥 Осталось: " + free + " генерации";
+    function showModal(title, text) {
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalText").innerHTML = text;
+      document.getElementById("modal").style.display = "flex";
+    }
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
+    if (!localStorage.getItem("onboarded")) {
+      showModal(
+        "Добро пожаловать 👋",
+        "Это AI Контент Студия.<br><br>Создавайте рекламу, идеи, продажи и посты за секунды."
+      );
+      localStorage.setItem("onboarded", "true");
+    }
+
+    window.addEventListener("load", async () => {
+      try {
+        await vkBridge.send("VKWebAppInit");
+        vk = true;
+
+        const info = await vkBridge.send("VKWebAppGetClientInfo");
+        vkPlatform = info.platform || "web";
+
+        // по правилам VK для цифровых ценностей — не показываем оплату на mobile клиентах
+        if (vkPlatform === "ios" || vkPlatform === "android") {
+          payBtn.classList.add("hidden");
+        }
+
+        robotSay("🤖 VK режим активен");
+      } catch (e) {
+        vk = false;
+        robotSay("🤖 обычный режим");
+      }
+    });
+
+    function setMode(m, btn) {
+      mode = m;
+      document.querySelectorAll(".button").forEach(x => x.classList.remove("active"));
+      btn.classList.add("active");
     }
 
     async function generate() {
-      const idea = document.getElementById("idea").value;
-      const result = document.getElementById("result");
+      const text = inputEl.value.trim();
+      if (!text) return;
 
-      if (!idea) {
-        result.innerText = "Введите идею!";
+      if (!premium && free <= 0) {
+        resultEl.innerText = "Лимит бесплатных генераций закончился.";
         return;
       }
 
-      if (free <= 0) {
-        result.innerText = "💰 Лимит закончился";
-        return;
+      if (!premium) {
+        free--;
+        localStorage.setItem("free", free);
+        freeLeftEl.textContent = free;
       }
 
-      free--;
-      updateLimit();
-
-      let prompt = "";
-
-      if (mode === "post") prompt = "Напиши пост: " + idea;
-      if (mode === "ads") prompt = "Сделай рекламу: " + idea;
-      if (mode === "idea") prompt = "Бизнес идея: " + idea;
-      if (mode === "sales") prompt = "Продающий текст: " + idea;
-
-      result.innerText = "Генерация...";
+      robotSay("⏳ Генерация...");
 
       try {
-        const res = await fetch("https://vk-post-ai.onrender.com/generate", {
+        const res = await fetch("/api/generate", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            topic: idea,
-            type: mode,
-            category: "business"
-          })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text, mode })
         });
 
         const data = await res.json();
 
-        result.innerText = data.result || "Ошибка генерации";
+        const clean = String(data?.text || "Ошибка генерации")
+          .replace(/[*#•]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
+        resultEl.innerText = clean;
+        robotSay("🤖 Готово!");
       } catch (e) {
-        result.innerText = "Ошибка соединения с сервером";
+        resultEl.innerText = "Ошибка сервера";
+        robotSay("❌ ошибка");
       }
     }
 
     function copyText() {
-      const text = document.getElementById("result").innerText;
-      navigator.clipboard.writeText(text);
-      alert("Скопировано!");
+      navigator.clipboard.writeText(resultEl.innerText);
     }
 
-    function shareStory() {
-      const text = document.getElementById("result").innerText;
-
-      vkBridge.send("VKWebAppShowStoryBox", {
-        background_type: "image",
-        url: "https://mini-app-delta-roan.vercel.app",
-        stickers: [{
-          sticker_type: "renderable",
-          text: text.substring(0, 200)
-        }]
-      });
+    function speakText() {
+      const txt = resultEl.innerText.trim();
+      if (!txt) return;
+      const msg = new SpeechSynthesisUtterance(txt);
+      msg.lang = "ru-RU";
+      speechSynthesis.speak(msg);
     }
 
-    function improve() {
-      const current = document.getElementById("result").innerText;
-      document.getElementById("idea").value = current;
-      generate();
+    function stopSpeech() {
+      speechSynthesis.cancel();
     }
 
-    function buy() {
-      vkBridge.send("VKWebAppOpenPayForm", {
-        app_id: 12345678, // ⚠️ 54474085
-        action: "pay-to-service",
-        params: {
-          amount: 15, // ✅ теперь 15 голосов
-          description: "15 генераций"
+    function upgrade() {
+      if (resultEl.innerText.trim()) {
+        resultEl.innerText += "\nУлучшено AI";
+      }
+    }
+
+    async function openPremium() {
+      if (!vk) {
+        showModal("Информация", "Оплата доступна внутри VK.");
+        return;
+      }
+
+      if (vkPlatform === "ios" || vkPlatform === "android") {
+        showModal("Недоступно", "На мобильных клиентах VK оплата цифровых функций недоступна.");
+        return;
+      }
+
+      robotSay("💳 Открываю оплату...");
+
+      try {
+        const res = await vkBridge.send("VKWebAppShowOrderBox", {
+          type: "item",
+          item: "premium_1"
+        });
+
+        if (res?.status === "success") {
+          premium = true;
+          localStorage.setItem("premium", "true");
+          freeLeftEl.textContent = "∞";
+          resultEl.innerText = "💎 Premium активирован";
+          robotSay("✅ Premium активирован!");
+        } else {
+          robotSay("⛔ Оплата отменена");
         }
-      });
+      } catch (e) {
+        robotSay("❌ ошибка оплаты");
+        showModal("Ошибка", "Проверь, что item premium_1 создан в настройках монетизации VK.");
+      }
     }
   </script>
+
+</body>
+
+</html>
