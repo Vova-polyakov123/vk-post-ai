@@ -3,429 +3,872 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
   <title>AI Контент Студия</title>
   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
-
+  <script src="https://yookassa.ru/checkout-widget/v1/checkout-widget.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@vkontakte/vkui@6/dist/css/vkui.css" />
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: Arial;
-      background: #eef2f7
+      padding: 0;
+      box-sizing: border-box;
     }
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px
+    body {
+      font-family: system-ui, Roboto, sans-serif;
+      background: #f0f2f5;
+      padding-bottom: 30px;
     }
 
-    .header {
-      background: #ff7a00;
-      color: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      text-align: center
+    .vkui--dark body {
+      background: #19191a;
+      color: #e1e3e6;
     }
 
-    .robot-float {
+    .onboard {
       position: fixed;
-      top: 10px;
-      right: 15px;
-      z-index: 9999;
-      text-align: center
+      inset: 0;
+      background: #0a0c12;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 2000;
+      padding: 24px;
     }
 
-    .robot {
-      width: 80px;
-      animation: float 2s infinite
+    .onboard img {
+      width: 100px;
+      margin-bottom: 20px;
+      animation: float 2s infinite;
     }
 
     @keyframes float {
       0% {
-        transform: translateY(0)
+        transform: translateY(0);
       }
 
       50% {
-        transform: translateY(-10px)
+        transform: translateY(-8px);
       }
 
       100% {
-        transform: translateY(0)
+        transform: translateY(0);
       }
     }
 
-    .mouth {
-      width: 20px;
-      height: 4px;
-      background: #000;
-      margin: 5px auto;
-      border-radius: 10px
-    }
-
-    .robot-text {
-      font-size: 11px;
-      background: rgba(0, 0, 0, .65);
-      color: #fff;
-      padding: 6px;
-      border-radius: 8px;
-      max-width: 180px
-    }
-
-    .button {
-      padding: 12px;
+    .onboard button {
+      background: #ff7a00;
       border: none;
-      border-radius: 10px;
+      border-radius: 60px;
+      padding: 14px 32px;
+      font-weight: 700;
+      font-size: 18px;
       color: #fff;
-      font-weight: bold;
-      opacity: .85;
-      cursor: pointer
+      margin-top: 32px;
+      cursor: pointer;
     }
 
-    .active {
-      outline: 3px solid #000;
-      opacity: 1
+    .topStatus {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(4px);
+      padding: 10px;
+      text-align: center;
+      font-weight: 700;
+      border-bottom: 1px solid #eee;
+      position: sticky;
+      top: 0;
+      z-index: 9;
     }
 
-    .ads {
-      background: #ff7a00
+    .robot-cup {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 100;
+      cursor: pointer;
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(8px);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
     }
 
-    .idea {
-      background: #9b59b6
+    .robot-cup:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
     }
 
-    .sales {
-      background: #2ecc71
+    .cup {
+      position: relative;
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(145deg, #f3d8b0, #e0c3a5);
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .post {
-      background: #3498db
+    .cup::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: -10px;
+      width: 14px;
+      height: 20px;
+      background: linear-gradient(145deg, #f3d8b0, #e0c3a5);
+      border-radius: 20px 0 0 20px;
+      box-shadow: -3px 0 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .robot-mini {
+      font-size: 32px;
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+      animation: fly 1.8s ease-in-out infinite;
+    }
+
+    .green-fire {
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 14px;
+      background: #2ecc71;
+      border-radius: 50%;
+      animation: pulse 0.8s infinite;
+      box-shadow: 0 0 8px #2ecc71;
+    }
+
+    @keyframes fly {
+      0% {
+        transform: translateY(0px) rotate(0deg);
+      }
+
+      50% {
+        transform: translateY(-8px) rotate(3deg);
+      }
+
+      100% {
+        transform: translateY(0px) rotate(0deg);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(0.8);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.3);
+      }
+
+      100% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(0.8);
+      }
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #ff7a00, #ff9a3d);
+      border-radius: 40px;
+      padding: 18px 16px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+
+    .premium-badge {
+      background: linear-gradient(135deg, gold, #ffaa00);
+      color: #2c3e50;
+      border-radius: 20px;
+      padding: 2px 8px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 28px;
+      padding: 12px 6px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      color: #2c3e50;
+    }
+
+    .vkui--dark .card {
+      background: #2c2c2e;
+      color: #e1e3e6;
+    }
+
+    .card.active {
+      color: #fff;
+      background: var(--c, #ff7a00);
+      transform: scale(0.97);
+    }
+
+    .card.locked {
+      filter: grayscale(0.2);
+      cursor: not-allowed;
+      opacity: 0.7;
+      position: relative;
+    }
+
+    .card.locked::after {
+      content: "🔒";
+      position: absolute;
+      right: 8px;
+      top: 4px;
+      font-size: 12px;
+    }
+
+    .hint {
+      font-size: 9px;
+      margin-top: 6px;
+      background: rgba(0, 0, 0, 0.03);
+      padding: 4px;
+      border-radius: 10px;
+      color: #5a6874;
+    }
+
+    .active .hint {
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(0, 0, 0, 0.1);
     }
 
     .input {
       width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border: none;
-      border-radius: 10px;
-      box-sizing: border-box
-    }
-
-    .gen-btn {
-      width: 100%;
-      margin-top: 10px;
-      padding: 12px;
-      background: orange;
-      border: none;
-      color: #fff;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer
-    }
-
-    .result {
-      margin-top: 15px;
+      padding: 14px 16px;
+      border-radius: 60px;
+      border: 1px solid #ddd;
+      font-size: 16px;
+      margin-top: 8px;
       background: #fff;
-      padding: 12px;
-      border-radius: 10px;
-      min-height: 120px;
-      white-space: pre-wrap
+      color: #000;
+    }
+
+    .vkui--dark .input {
+      background: #1c1c1e;
+      color: #fff;
+      border-color: #3a3a3c;
+    }
+
+    .btn {
+      width: 100%;
+      background: #ff7a00;
+      border: none;
+      border-radius: 60px;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 16px;
+      cursor: pointer;
     }
 
     .actions {
       display: flex;
-      gap: 10px;
-      margin-top: 10px
+      gap: 12px;
+      margin: 12px 0;
+      flex-wrap: wrap;
     }
 
-    .actions button {
+    .action-wrapper {
       flex: 1;
-      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .action {
+      padding: 12px;
+      border-radius: 60px;
       border: none;
-      border-radius: 10px;
+      font-weight: 700;
       color: #fff;
-      font-weight: bold;
-      cursor: pointer
+      cursor: pointer;
+      width: 100%;
     }
 
-    .copy {
-      background: #ff7a00
+    .action-hint {
+      font-size: 10px;
+      color: #5a6874;
+      text-align: center;
     }
 
-    .voice {
-      background: #2ecc71
-    }
-
-    .stop {
-      background: #e67e22
-    }
-
-    .magic {
-      background: #9b59b6
-    }
-
-    .pay {
-      background: #e74c3c
-    }
-
-    .notice {
-      margin-top: 12px;
+    .result {
       background: #fff;
-      padding: 10px;
-      border-radius: 10px;
-      color: #333
+      border-radius: 28px;
+      padding: 20px;
+      white-space: pre-wrap;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 200px;
+      margin-bottom: 20px;
+      border: 1px solid #f0f0f0;
+      max-height: 500px;
+      overflow-y: auto;
+      color: #000;
+    }
+
+    .vkui--dark .result {
+      background: #1c1c1e;
+      color: #fff;
+      border-color: #3a3a3c;
+    }
+
+    .premium-banner {
+      background: linear-gradient(135deg, #2c3e50, #4a627a);
+      border-radius: 28px;
+      padding: 16px;
+      margin-top: 20px;
+      color: #fff;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .premium-btn {
+      background: gold;
+      color: #2c3e50;
+      border: none;
+      border-radius: 40px;
+      padding: 8px 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .check-status-btn {
+      background: #3498db;
+      margin-top: 8px;
+      font-size: 12px;
+      padding: 6px 12px;
+      width: auto;
+    }
+
+    .footer-info {
+      margin-top: 28px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 24px;
+      font-size: 12px;
+      text-align: center;
+      color: #5a6874;
+    }
+
+    .vkui--dark .footer-info {
+      background: #1c1c1e;
+      color: #8e8e93;
+    }
+
+    .footer-info a {
+      color: #ff7a00;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .toast-msg {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e2a32;
+      padding: 8px 20px;
+      border-radius: 40px;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0;
+      transition: 0.2s;
+      pointer-events: none;
+      z-index: 1100;
+      white-space: nowrap;
     }
 
     .modal {
+      display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, .55);
-      display: none;
+      background: rgba(0, 0, 0, 0.5);
       align-items: center;
       justify-content: center;
-      z-index: 10000
+      z-index: 1001;
     }
 
-    .modal-box {
-      width: min(420px, 90vw);
+    .modal-content {
       background: #fff;
-      border-radius: 14px;
+      max-width: 90%;
+      width: 400px;
+      border-radius: 28px;
       padding: 20px;
-      text-align: center
+      max-height: 80vh;
+      overflow-y: auto;
+      color: #000;
     }
 
-    .modal-box button {
-      margin-top: 12px;
-      padding: 10px 18px;
-      border: none;
-      border-radius: 10px;
-      background: #ff7a00;
+    .vkui--dark .modal-content {
+      background: #1c1c1e;
       color: #fff;
-      font-weight: bold;
-      cursor: pointer
     }
 
-    .hidden {
-      display: none !important
+    .review-item {
+      border-bottom: 1px solid #eee;
+      padding: 12px 0;
+    }
+
+    .review-name {
+      font-weight: 700;
+      color: #ff7a00;
+    }
+
+    .star-rating {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin: 15px 0;
+    }
+
+    .star {
+      font-size: 28px;
+      cursor: pointer;
+      color: #ccc;
+    }
+
+    .star.selected {
+      color: gold;
+    }
+
+    .close-modal {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
     }
   </style>
 </head>
 
 <body>
-
-  <div class="modal" id="modal">
-    <div class="modal-box">
-      <h3 id="modalTitle">Добро пожаловать 👋</h3>
-      <div id="modalText">
-        Это AI Контент Студия.<br><br>
-        Доступно:<br>
-        • Реклама<br>
-        • Идеи<br>
-        • Продажи<br>
-        • Посты
-      </div>
-      <button onclick="closeModal()">Понятно</button>
+  <div id="onboard" class="onboard">
+    <img src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png" alt="robot">
+    <h2>🤖 AI Контент Студия PRO</h2>
+    <p>Профессиональная генерация через нейросеть</p>
+    <button class="btn" id="startAppBtn">🚀 Запустить</button>
+  </div>
+  <div class="topStatus" style="display: none;">✨ AI Контент Студия | Нейросеть + VK</div>
+  <div class="robot-cup" id="storyShareBtn" style="display: none;">
+    <div class="cup">
+      <div class="robot-mini">🤖</div>
+      <div class="green-fire"></div>
     </div>
   </div>
-
-  <div id="robotBox" class="robot-float">
-    <img class="robot" src="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
-    <div class="mouth"></div>
-    <div id="robotText" class="robot-text">🤖 загрузка...</div>
-  </div>
-
-  <div class="container">
-
-    <div class="header">
-      <h2>AI Контент Студия</h2>
-      <div>Бесплатно: <span id="freeLeft">3</span></div>
-    </div>
-
-    <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-      <button class="button ads active" onclick="setMode('ads',this)">Реклама</button>
-      <button class="button idea" onclick="setMode('idea',this)">Идея</button>
-      <button class="button sales" onclick="setMode('sales',this)">Продажи</button>
-      <button class="button post" onclick="setMode('post',this)">Пост</button>
-    </div>
-
-    <input id="input" class="input" placeholder="Введите тему">
-    <button class="gen-btn" onclick="generate()">Сгенерировать 🚀</button>
-
-    <div class="result" id="result"></div>
-
+  <div class="container" id="appContainer" style="display:none;">
+    <div class="header">🤖 AI КОНТЕНТ СТУДИЯ <span id="premiumLabel" class="premium-badge">Бесплатно</span></div>
+    <div class="grid" id="modesGrid"></div>
+    <input id="input" class="input" placeholder="О чём написать? Например: продажа дома, фитнес, кофе">
+    <button id="generateBtn" class="btn">✨ Сгенерировать</button>
     <div class="actions">
-      <button class="copy" onclick="copyText()">Копировать 📋</button>
-      <button class="voice" onclick="speakText()">Озвучить 🔊</button>
-      <button class="stop" onclick="stopSpeech()">Стоп ⛔</button>
-      <button class="magic" onclick="upgrade()">Улучшить ✨</button>
-      <button id="payBtn" class="pay" onclick="openPremium()">Премиум 💎</button>
+      <div class="action-wrapper"><button class="action" style="background:#ff7a00" id="copyBtn">📋 Копировать</button>
+        <div class="action-hint">Скопировать текст</div>
+      </div>
+      <div class="action-wrapper"><button class="action" style="background:#2c3e50" id="supportBtn">🆘
+          Поддержка</button>
+        <div class="action-hint">Написать разработчику</div>
+      </div>
+      <div class="action-wrapper"><button class="action" style="background:#8e44ad" id="reviewsBtn">⭐ Отзывы</button>
+        <div class="action-hint">Оценить приложение</div>
+      </div>
     </div>
-
-    <div class="notice">
-      Платная функция: Premium — безлимитная генерация контента.<br>
-      Оплата доступна только через одобренный способ оплаты VK в web-версии.
+    <div id="result" class="result">🌟 Введите тему и нажмите «Сгенерировать»</div>
+    <div id="premiumBanner" class="premium-banner">
+      <strong>✨ Премиум: все режимы + история</strong>
+      <button id="buyPremiumBtn" class="premium-btn">Купить PREMIUM (149 ₽) на 30 дней</button>
+      <button id="checkStatusBtn" class="premium-btn check-status-btn">🔄 Проверить статус</button>
     </div>
-
+    <div id="historyPanel" class="footer-info" style="display:none;">
+      <div style="display:flex;justify-content:space-between;"><b>📜 История</b><span id="clearHistoryBtn"
+          style="cursor:pointer;">🗑️ Очистить</span></div>
+      <div id="historyList"></div>
+    </div>
+    <div class="footer-info">
+      🇷🇺 AI Контент Студия — генерация контента для VK Mini Apps.<br>
+      <a href="#" id="footerTerms">Пользовательское соглашение</a> | <a href="#" id="footerPolicy">Политика
+        конфиденциальности</a>
+    </div>
   </div>
-
+  <div id="toastMsg" class="toast-msg"></div>
+  <div id="reviewModal" class="modal">
+    <div class="modal-content"><span class="close-modal" onclick="closeReviewModal()">&times;</span>
+      <h3>📝 Оцените приложение</h3>
+      <div class="star-rating" id="starRating"><span class="star" data-value="1">★</span><span class="star"
+          data-value="2">★</span><span class="star" data-value="3">★</span><span class="star"
+          data-value="4">★</span><span class="star" data-value="5">★</span></div>
+      <input type="text" id="reviewName" placeholder="Ваше имя" value="Гость"
+        style="width:100%;padding:10px;border-radius:30px;margin:8px 0; border:1px solid #ddd; background:#fff; color:#000;">
+      <textarea id="reviewText" rows="3" placeholder="Напишите отзыв..."
+        style="width:100%;border-radius:20px;padding:10px; border:1px solid #ddd; background:#fff; color:#000;"></textarea>
+      <button id="submitReviewBtn"
+        style="background:#ff7a00;border:none;border-radius:40px;padding:12px;width:100%;font-weight:bold;">Оставить
+        отзыв</button>
+      <div id="reviewsList">Загрузка...</div>
+    </div>
+  </div>
   <script>
-    let mode = "ads";
-    let vk = false;
-    let vkPlatform = "web";
+    (function () {
+      let currentMode = "ads";
+      let isPremium = false;
+      let vkReady = false;
+      let reviews = JSON.parse(localStorage.getItem("ai_reviews") || "[]");
+      let historyArr = JSON.parse(localStorage.getItem("ai_history") || "[]");
+      let currentStar = 0;
+      let checkoutWidget = null;
+      let paymentOverlay = null;
+      const API_URL = "/api/generate";
 
-    const inputEl = document.getElementById("input");
-    const resultEl = document.getElementById("result");
-    const freeLeftEl = document.getElementById("freeLeft");
-    const robotTextEl = document.getElementById("robotText");
-    const payBtn = document.getElementById("payBtn");
+      function showToast(msg) {
+        const t = document.getElementById("toastMsg");
+        if (t) { t.textContent = msg; t.style.opacity = "1"; setTimeout(() => t.style.opacity = "0", 3000); }
+      }
 
-    let free = Number(localStorage.getItem("free") || 3);
-    let premium = localStorage.getItem("premium") === "true";
-    freeLeftEl.textContent = premium ? "∞" : free;
+      function cleanMarkdown(text) {
+        if (!text) return text;
+        return text.replace(/^#+\s*/gm, '').replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1').replace(/^[-*]\s+/gm, '• ').replace(/#/g, '').replace(/\*/g, '');
+      }
 
-    function robotSay(text) {
-      robotTextEl.textContent = text;
-    }
-
-    function showModal(title, text) {
-      document.getElementById("modalTitle").textContent = title;
-      document.getElementById("modalText").innerHTML = text;
-      document.getElementById("modal").style.display = "flex";
-    }
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-
-    if (!localStorage.getItem("onboarded")) {
-      showModal(
-        "Добро пожаловать 👋",
-        "Это AI Контент Студия.<br><br>Создавайте рекламу, идеи, продажи и посты за секунды."
-      );
-      localStorage.setItem("onboarded", "true");
-    }
-
-    window.addEventListener("load", async () => {
-      try {
-        await vkBridge.send("VKWebAppInit");
-        vk = true;
-
-        const info = await vkBridge.send("VKWebAppGetClientInfo");
-        vkPlatform = info.platform || "web";
-
-        // по правилам VK для цифровых ценностей — не показываем оплату на mobile клиентах
-        if (vkPlatform === "ios" || vkPlatform === "android") {
-          payBtn.classList.add("hidden");
+      async function fetchPremiumStatusAndUpdate() {
+        if (!vkReady) return false;
+        try {
+          const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
+          const userId = userInfo.id;
+          const response = await fetch(`/api/check-premium?userId=${userId}`);
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const data = await response.json();
+          const serverStatus = data.isPremium === true;
+          if (serverStatus !== isPremium) {
+            isPremium = serverStatus;
+            localStorage.setItem("ai_premium", isPremium ? "true" : "false");
+            document.getElementById("premiumLabel").innerText = isPremium ? "PREMIUM ✨" : "Бесплатно";
+            document.getElementById("historyPanel").style.display = isPremium ? "block" : "none";
+            updateLockedModes();
+            if (isPremium) showToast("Премиум активен");
+          }
+          return isPremium;
+        } catch (e) {
+          console.error("fetch error", e);
+          return isPremium;
         }
-
-        robotSay("🤖 VK режим активен");
-      } catch (e) {
-        vk = false;
-        robotSay("🤖 обычный режим");
-      }
-    });
-
-    function setMode(m, btn) {
-      mode = m;
-      document.querySelectorAll(".button").forEach(x => x.classList.remove("active"));
-      btn.classList.add("active");
-    }
-
-    async function generate() {
-      const text = inputEl.value.trim();
-      if (!text) return;
-
-      if (!premium && free <= 0) {
-        resultEl.innerText = "Лимит бесплатных генераций закончился.";
-        return;
       }
 
-      if (!premium) {
-        free--;
-        localStorage.setItem("free", free);
-        freeLeftEl.textContent = free;
+      async function initVK() {
+        if (!window.vkBridge) { showToast("SDK VK не загружен."); return false; }
+        try {
+          await vkBridge.send("VKWebAppInit");
+          vkReady = true;
+          await vkBridge.send("VKWebAppGetUserInfo");
+          await vkBridge.send("VKWebAppLoadingCompleted");
+          vkBridge.subscribe(({ detail: { type, data } }) => {
+            if (type === 'VKWebAppUpdateConfig') document.body.classList.toggle('vkui--dark', data.scheme === 'VKWebAppScheme.dark');
+          });
+          const saved = localStorage.getItem("ai_premium");
+          isPremium = (saved === "true");
+          document.getElementById("premiumLabel").innerText = isPremium ? "PREMIUM ✨" : "Бесплатно";
+          document.getElementById("historyPanel").style.display = isPremium ? "block" : "none";
+          updateLockedModes();
+          await fetchPremiumStatusAndUpdate();
+          return true;
+        } catch (e) { console.error(e); return false; }
       }
 
-      robotSay("⏳ Генерация...");
-
-      try {
-        const res = await fetch("/api/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: text, mode })
+      function updateLockedModes() {
+        const premiumModes = ["viral", "business", "scripts"];
+        document.querySelectorAll(".card").forEach(card => {
+          const m = card.getAttribute("data-mode");
+          if (premiumModes.includes(m) && !isPremium) {
+            card.classList.add("locked");
+            if (currentMode === m) {
+              const firstFree = document.querySelector(".card:not(.locked)");
+              if (firstFree) firstFree.click();
+            }
+          } else card.classList.remove("locked");
         });
-
-        const data = await res.json();
-
-        const clean = String(data?.text || "Ошибка генерации")
-          .replace(/[*#•]/g, "")
-          .replace(/\s+/g, " ")
-          .trim();
-
-        resultEl.innerText = clean;
-        robotSay("🤖 Готово!");
-      } catch (e) {
-        resultEl.innerText = "Ошибка сервера";
-        robotSay("❌ ошибка");
-      }
-    }
-
-    function copyText() {
-      navigator.clipboard.writeText(resultEl.innerText);
-    }
-
-    function speakText() {
-      const txt = resultEl.innerText.trim();
-      if (!txt) return;
-      const msg = new SpeechSynthesisUtterance(txt);
-      msg.lang = "ru-RU";
-      speechSynthesis.speak(msg);
-    }
-
-    function stopSpeech() {
-      speechSynthesis.cancel();
-    }
-
-    function upgrade() {
-      if (resultEl.innerText.trim()) {
-        resultEl.innerText += "\nУлучшено AI";
-      }
-    }
-
-    async function openPremium() {
-      if (!vk) {
-        showModal("Информация", "Оплата доступна внутри VK.");
-        return;
       }
 
-      if (vkPlatform === "ios" || vkPlatform === "android") {
-        showModal("Недоступно", "На мобильных клиентах VK оплата цифровых функций недоступна.");
-        return;
-      }
-
-      robotSay("💳 Открываю оплату...");
-
-      try {
-        const res = await vkBridge.send("VKWebAppShowOrderBox", {
-          type: "item",
-          item: "premium_1"
-        });
-
-        if (res?.status === "success") {
-          premium = true;
-          localStorage.setItem("premium", "true");
-          freeLeftEl.textContent = "∞";
-          resultEl.innerText = "💎 Premium активирован";
-          robotSay("✅ Premium активирован!");
-        } else {
-          robotSay("⛔ Оплата отменена");
+      async function activatePremium() {
+        if (isPremium) return;
+        if (!vkReady) return;
+        try {
+          const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
+          const userId = userInfo.id;
+          const response = await fetch('/api/activate-premium', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(`HTTP ${response.status}: ${text.substring(0, 100)}`);
+          }
+          const data = await response.json();
+          if (data.success) {
+            isPremium = true;
+            localStorage.setItem("ai_premium", "true");
+            document.getElementById("premiumLabel").innerText = "PREMIUM ✨";
+            document.getElementById("historyPanel").style.display = "block";
+            updateLockedModes();
+            showToast("🎉 Премиум активирован на 30 дней!");
+            await fetchPremiumStatusAndUpdate();
+          } else {
+            showToast("Ошибка активации: " + (data.error || "неизвестная ошибка"));
+          }
+        } catch (e) {
+          console.error("activatePremium error", e);
+          showToast("Ошибка сети при активации: " + e.message);
         }
-      } catch (e) {
-        robotSay("❌ ошибка оплаты");
-        showModal("Ошибка", "Проверь, что item premium_1 создан в настройках монетизации VK.");
       }
-    }
+
+      async function purchasePremium() {
+        if (!vkReady) { showToast("Платёжная система не готова"); return; }
+        if (isPremium) { showToast("У вас уже есть Premium"); return; }
+        let userId = null;
+        try {
+          const userInfo = await vkBridge.send("VKWebAppGetUserInfo");
+          userId = userInfo.id;
+        } catch (e) { showToast("Не удалось получить ID пользователя"); return; }
+        showToast("Создаём платёж...");
+        try {
+          const resp = await fetch('/api/create-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+          });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.error || 'Ошибка сервера');
+          if (data.confirmationToken) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000000CC;z-index:10000;display:flex;align-items:center;justify-content:center';
+            document.body.appendChild(overlay);
+            paymentOverlay = overlay;
+            const container = document.createElement('div');
+            container.style.cssText = 'width:90%;max-width:500px;background:#fff;border-radius:28px;padding:20px;position:relative';
+            overlay.appendChild(container);
+            const closeBtn = document.createElement('button');
+            closeBtn.innerText = '✕';
+            closeBtn.style.cssText = 'position:absolute;top:12px;right:16px;font-size:24px;background:none;border:none;cursor:pointer';
+            closeBtn.onclick = () => {
+              if (checkoutWidget) checkoutWidget.destroy();
+              if (paymentOverlay && paymentOverlay.parentNode) paymentOverlay.remove();
+              paymentOverlay = null;
+            };
+            container.appendChild(closeBtn);
+            const widgetContainer = document.createElement('div');
+            widgetContainer.id = 'yookassa-widget-temp';
+            container.appendChild(widgetContainer);
+            checkoutWidget = new window.YooMoneyCheckoutWidget({
+              confirmation_token: data.confirmationToken,
+              error_callback: (err) => {
+                console.error(err);
+                showToast("Ошибка открытия оплаты");
+                if (paymentOverlay) paymentOverlay.remove();
+                paymentOverlay = null;
+                checkoutWidget = null;
+              }
+            });
+            checkoutWidget.on('complete', () => {
+              console.log("Оплата завершена");
+              if (paymentOverlay) paymentOverlay.remove();
+              paymentOverlay = null;
+              if (checkoutWidget) checkoutWidget.destroy();
+              checkoutWidget = null;
+              activatePremium();
+            });
+            checkoutWidget.render('yookassa-widget-temp');
+          } else {
+            showToast("Ошибка: сервер не вернул токен для оплаты");
+          }
+        } catch (e) { console.error(e); showToast("Ошибка сервера: " + e.message); }
+      }
+
+      async function generate() {
+        const inputElem = document.getElementById("input");
+        const resultDiv = document.getElementById("result");
+        const theme = inputElem.value.trim();
+        if (!theme) { resultDiv.innerText = "⚠️ Введите тему"; return; }
+        const premiumModes = ["viral", "business", "scripts"];
+        if (premiumModes.includes(currentMode) && !isPremium) {
+          resultDiv.innerText = "🔒 Режим доступен только в Premium";
+          return;
+        }
+        resultDiv.innerText = "⏳ Генерация...";
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), 15000);
+        try {
+          const resp = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ theme, mode: currentMode }), signal: controller.signal });
+          clearTimeout(id);
+          if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
+          const data = await resp.json();
+          if (!data.text) throw new Error("Нет текста");
+          const cleaned = cleanMarkdown(data.text);
+          resultDiv.innerText = cleaned;
+          if (isPremium) addToHistory(theme, cleaned);
+          showToast("✅ Текст готов");
+        } catch (err) {
+          clearTimeout(id);
+          console.error(err);
+          resultDiv.innerText = err.name === 'AbortError' ? "❌ Превышено время ожидания" : "❌ Ошибка генерации. Проверьте сервер.";
+          showToast("Ошибка сервера");
+        }
+      }
+
+      function copyText() {
+        const text = document.getElementById("result").innerText;
+        if (!text || text.includes("Генерация") || text.includes("Введите тему")) { showToast("Сначала сгенерируйте текст"); return; }
+        navigator.clipboard.writeText(text).then(() => showToast("Скопировано"));
+      }
+
+      function openSupport() {
+        window.location.href = "mailto:ai_content_studio@mail.ru?subject=Проблема с приложением AI Контент Студия&body=Опишите вашу проблему:";
+      }
+
+      function loadHistory() { historyArr = JSON.parse(localStorage.getItem("ai_history") || "[]"); renderHistory(); }
+      function saveHistory() { if (isPremium) localStorage.setItem("ai_history", JSON.stringify(historyArr)); }
+      function addToHistory(q, a) { if (!isPremium) return; historyArr.unshift({ question: q, answer: a, date: new Date().toLocaleString() }); if (historyArr.length > 30) historyArr.pop(); saveHistory(); renderHistory(); }
+      function renderHistory() {
+        const container = document.getElementById("historyList"); if (!container) return;
+        if (!isPremium) { container.innerHTML = ""; return; }
+        if (!historyArr.length) { container.innerHTML = "<div>История пуста</div>"; return; }
+        let html = "";
+        historyArr.forEach((item, idx) => { html += `<div style="padding:8px 0;border-bottom:1px solid #eee;cursor:pointer;" onclick="window.loadHistoryItem(${idx})"><div style="font-weight:600;">❓ ${escapeHtml(item.question.substring(0, 60))}</div><div style="font-size:12px;">${escapeHtml(item.answer.substring(0, 80))}...</div></div>`; });
+        container.innerHTML = html;
+      }
+      window.loadHistoryItem = function (idx) { if (historyArr[idx]) { document.getElementById("input").value = historyArr[idx].question; document.getElementById("result").innerHTML = historyArr[idx].answer; showToast("Загружено"); } };
+      function clearHistory() { if (!isPremium) { showToast("Доступно в Premium"); return; } if (confirm("Очистить историю?")) { historyArr = []; saveHistory(); renderHistory(); showToast("История очищена"); } }
+
+      function loadReviews() { reviews = JSON.parse(localStorage.getItem("ai_reviews") || "[]"); renderReviewsList(); }
+      function renderReviewsList() {
+        const container = document.getElementById("reviewsList"); if (!container) return;
+        if (!reviews.length) { container.innerHTML = "<p>⭐ Будьте первым, кто оставит отзыв!</p>"; return; }
+        let html = "";
+        reviews.forEach(r => { let stars = ""; for (let i = 1; i <= 5; i++) stars += (i <= r.star) ? "★" : "☆"; html += `<div class="review-item"><span class="review-name">${escapeHtml(r.name)}</span> <span style="color:gold;">${stars}</span><div>${escapeHtml(r.text)}</div></div>`; });
+        container.innerHTML = html;
+      }
+      function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+      function addReview() {
+        const name = document.getElementById("reviewName").value.trim();
+        const text = document.getElementById("reviewText").value.trim();
+        if (!text) { showToast("Напишите отзыв"); return; }
+        if (currentStar === 0) { showToast("Поставьте оценку"); return; }
+        reviews.push({ name: name || "Гость", text, star: currentStar });
+        localStorage.setItem("ai_reviews", JSON.stringify(reviews));
+        renderReviewsList();
+        document.getElementById("reviewText").value = "";
+        currentStar = 0; renderStarRating();
+        closeReviewModal();
+        showToast("Спасибо за отзыв!");
+      }
+      function renderStarRating() { document.querySelectorAll(".star").forEach(star => { const val = parseInt(star.dataset.value); if (val <= currentStar) star.classList.add("selected"); else star.classList.remove("selected"); }); }
+      function openReviewsModal() { document.getElementById("reviewModal").style.display = "flex"; loadReviews(); }
+      function closeReviewModal() { document.getElementById("reviewModal").style.display = "none"; }
+
+      function buildModesGrid() {
+        const modes = [
+          { id: "ads", label: "📢 Реклама", hint: "Продающий текст", color: "#ff7a00", premium: false },
+          { id: "post", label: "📝 Пост", hint: "Полезный контент", color: "#3498db", premium: false },
+          { id: "sales", label: "💰 Продажи", hint: "Оффер + кейсы", color: "#2ecc71", premium: false },
+          { id: "idea", label: "💡 Идеи", hint: "Креативные форматы", color: "#9b59b6", premium: false },
+          { id: "motivation", label: "⚡ Мотивация", hint: "Энергия", color: "#e74c3c", premium: false },
+          { id: "scripts", label: "🎬 Сценарии", hint: "Сценарий видео (Premium)", color: "#16a085", premium: true },
+          { id: "chat", label: "💬 Ответы", hint: "Скрипт для клиентов", color: "#f39c12", premium: false },
+          { id: "viral", label: "🔥 Вирус", hint: "Шок-контент (Premium)", color: "#d35400", premium: true },
+          { id: "business", label: "🏢 Бизнес", hint: "Оффер для бизнеса (Premium)", color: "#2c3e50", premium: true }
+        ];
+        const grid = document.getElementById("modesGrid");
+        grid.innerHTML = "";
+        modes.forEach(m => {
+          const card = document.createElement("div");
+          card.className = "card";
+          if (currentMode === m.id) card.classList.add("active");
+          card.setAttribute("data-mode", m.id);
+          card.innerHTML = `${m.label}<div class="hint">${m.hint}</div>`;
+          if (m.premium && !isPremium) card.classList.add("locked");
+          card.onclick = () => {
+            if (card.classList.contains("locked")) { showToast("Режим доступен в Premium"); return; }
+            currentMode = m.id;
+            document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+            document.documentElement.style.setProperty("--c", m.color);
+          };
+          grid.appendChild(card);
+        });
+        updateLockedModes();
+      }
+
+      function startApp() {
+        document.getElementById("onboard").style.display = "none";
+        document.getElementById("appContainer").style.display = "block";
+        document.querySelector(".topStatus").style.display = "block";
+        document.getElementById("storyShareBtn").style.display = "flex";
+        buildModesGrid();
+        loadHistory();
+        loadReviews();
+        showToast("Готово! Введите тему.");
+        fetchPremiumStatusAndUpdate();
+      }
+
+      function showTerms() { alert("Пользовательское соглашение\nИспользование приложения означает полное согласие."); }
+      function showPrivacy() { alert("Политика конфиденциальности\nДанные не передаются третьим лицам."); }
+
+      document.getElementById("startAppBtn")?.addEventListener("click", startApp);
+      document.getElementById("generateBtn")?.addEventListener("click", generate);
+      document.getElementById("copyBtn")?.addEventListener("click", copyText);
+      document.getElementById("supportBtn")?.addEventListener("click", openSupport);
+      document.getElementById("reviewsBtn")?.addEventListener("click", openReviewsModal);
+      document.getElementById("buyPremiumBtn")?.addEventListener("click", purchasePremium);
+      document.getElementById("checkStatusBtn")?.addEventListener("click", async () => {
+        showToast("Проверка статуса...");
+        await fetchPremiumStatusAndUpdate();
+        showToast(isPremium ? "✅ Premium активен" : "❌ Premium не активирован");
+      });
+      document.getElementById("clearHistoryBtn")?.addEventListener("click", clearHistory);
+      document.getElementById("submitReviewBtn")?.addEventListener("click", addReview);
+      document.getElementById("footerTerms")?.addEventListener("click", (e) => { e.preventDefault(); showTerms(); });
+      document.getElementById("footerPolicy")?.addEventListener("click", (e) => { e.preventDefault(); showPrivacy(); });
+      document.querySelectorAll(".star").forEach(star => star.addEventListener("click", () => { currentStar = parseInt(star.dataset.value); renderStarRating(); }));
+
+      window.closeReviewModal = closeReviewModal;
+      initVK();
+    })();
   </script>
-
 </body>
 
 </html>
